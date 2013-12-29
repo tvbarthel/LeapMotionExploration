@@ -32,6 +32,7 @@ namespace LeapMotionExploration.Windows
             buttonTwoHandManipulation.Click += buttonClick;
             buttonClapMusic.Click += buttonClick;
             buttonClap.Click += buttonClick;
+            buttonFinalDemo.Click += buttonClick;
         }
 
         private void buttonClick(object sender, RoutedEventArgs e)
@@ -67,6 +68,10 @@ namespace LeapMotionExploration.Windows
             else if(sender.Equals(buttonClapMusic))
             {
                 new WindowClapSound().Show();
+            }
+            else if (sender.Equals(buttonFinalDemo))
+            {
+                new WindowFinalDemo().Show();
             }
         }
     }

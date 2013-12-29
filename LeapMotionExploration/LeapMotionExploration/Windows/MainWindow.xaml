@@ -67,5 +67,13 @@
         <Button x:Name="buttonClapMusic" Margin="0,0,0,5" Padding="10" HorizontalContentAlignment="Stretch"
                 TextBlock.TextAlignment="Justify" TextBlock.FontFamily="Tahoma">Experiment 6b : Clap &amp; Sound</Button>
 
+        <!--
+            ***************************************
+            ********** Final Demonstration ********
+            ***************************************
+        -->
+        <Button x:Name="buttonFinalDemo" Margin="0,0,0,5" Padding="10" HorizontalContentAlignment="Stretch"
+                TextBlock.TextAlignment="Justify" TextBlock.FontFamily="Tahoma">Final Demonstration</Button>
+
     </StackPanel>
 </Window>

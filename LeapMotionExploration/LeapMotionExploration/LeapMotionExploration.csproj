@@ -82,7 +82,6 @@
     <Compile Include="MyLeap\Listener\LeapListenerRotateSelection.cs" />
     <Compile Include="MyLeap\Listener\LeapListenerCloseLeftHand.cs" />
     <Compile Include="MyLeap\Utils\LeapUtils.cs" />
-    <Compile Include="RollTwoHandAngle.cs" />
     <Compile Include="Windows\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
     </Compile>
@@ -94,6 +93,9 @@
     </Compile>
     <Compile Include="Windows\Samples\WindowCursorDemo.xaml.cs">
       <DependentUpon>WindowCursorDemo.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Windows\Samples\WindowFinalDemo.xaml.cs">
+      <DependentUpon>WindowFinalDemo.xaml</DependentUpon>
     </Compile>
     <Compile Include="Windows\Samples\WindowMenuFirstAttempt.xaml.cs">
       <DependentUpon>WindowMenuFirstAttempt.xaml</DependentUpon>
@@ -129,6 +131,10 @@
       <SubType>Code</SubType>
     </Compile>
     <Page Include="Windows\Samples\WindowCursorDemo.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Windows\Samples\WindowFinalDemo.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
