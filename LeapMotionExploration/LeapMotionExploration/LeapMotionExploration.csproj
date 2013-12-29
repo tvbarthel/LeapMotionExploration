@@ -95,6 +95,9 @@
     <Compile Include="Windows\Samples\WindowCursorDemo.xaml.cs">
       <DependentUpon>WindowCursorDemo.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Windows\Samples\WindowFinalDemo.xaml.cs">
+      <DependentUpon>WindowFinalDemo.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Windows\Samples\WindowMenuFirstAttempt.xaml.cs">
       <DependentUpon>WindowMenuFirstAttempt.xaml</DependentUpon>
     </Compile>
@@ -129,6 +132,10 @@
       <SubType>Code</SubType>
     </Compile>
     <Page Include="Windows\Samples\WindowCursorDemo.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Windows\Samples\WindowFinalDemo.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
