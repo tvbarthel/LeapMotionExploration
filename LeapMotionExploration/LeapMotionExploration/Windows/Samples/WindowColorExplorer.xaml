@@ -1,0 +1,16 @@
+﻿<Window x:Class="LeapMotionExploration.WindowColorExplorer"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Name="mainWindow"
+        Title="MainWindow" Height="350" Width="525" Background="#FF7D7D7D">
+    <DockPanel>
+        <TextBlock DockPanel.Dock="Top" x:Name="textBlockApplicationTitle" FontSize="24" FontWeight="Bold" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,10,0,0" FontFamily="Segoe WP Black" Foreground="#FF33B5E5"  Text="LeapMotion Exploration"/>
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Bottom" Background="#FFC8C8C8">               
+            <Rectangle x:Name="rectangleRedValue" Width="50" Height="100" Margin="10,10,10,0" Fill="#FF7D0000"/>
+            <Rectangle x:Name="rectangleGreenValue" Width="50" Height="100" Margin="10,10,10,0" Fill="#FF007D00"/>
+            <Rectangle x:Name="rectangleBlueValue" Width="50" Height="100" Margin="10,10,10,0" Fill="#FF00007D"/>
+        </StackPanel>
+
+
+    </DockPanel>
+</Window>

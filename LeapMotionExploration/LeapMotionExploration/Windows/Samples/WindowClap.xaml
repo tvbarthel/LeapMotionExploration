@@ -1,0 +1,11 @@
+﻿<Window x:Class="LeapMotionExploration.Windows.Samples.WindowClap"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="WindowClap" Height="300" Width="300">
+    <StackPanel Margin="20" Background="Gray" VerticalAlignment="Center">
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+            <TextBlock x:Name="counter" FontSize="30" Foreground="White" Margin="10" HorizontalAlignment="Center" VerticalAlignment="Center">0</TextBlock>
+        </StackPanel>
+        <TextBlock x:Name="listenerState" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0 20 0 0"></TextBlock>
+    </StackPanel>
+</Window>
