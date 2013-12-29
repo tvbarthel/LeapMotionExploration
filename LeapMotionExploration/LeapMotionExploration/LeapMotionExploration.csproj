@@ -82,7 +82,6 @@
     <Compile Include="MyLeap\Listener\LeapListenerRotateSelection.cs" />
     <Compile Include="MyLeap\Listener\LeapListenerCloseLeftHand.cs" />
     <Compile Include="MyLeap\Utils\LeapUtils.cs" />
-    <Compile Include="RollTwoHandAngle.cs" />
     <Compile Include="Windows\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
     </Compile>
