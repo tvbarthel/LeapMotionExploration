@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Leap;
 using MyLeap.Processor;
+using MyLeap.Event;
 
 namespace MyLeap.Listener
 {
@@ -13,9 +14,11 @@ namespace MyLeap.Listener
         public event Action<String> OnHandStateChanged;
         private LeapProcessorHandClosed detector;
 
-        public LeapListenerCloseLeftHand() {
+        public LeapListenerCloseLeftHand()
+        {
             detector = new LeapProcessorHandClosed();
             detector.onHandStateChange += mostLeftHandStateChanged;
+            detector.onStateChange += (x) => { };
         }
 
         public override void OnFrame(Controller controller)
@@ -27,16 +30,18 @@ namespace MyLeap.Listener
             }
         }
 
-        public void mostLeftHandStateChanged(Boolean isClosed)
+        public void mostLeftHandStateChanged(HandCloseEvent e)
         {
-            System.Diagnostics.Debug.WriteLine("Is closed ? " + isClosed);
-            if (isClosed)
+            switch (e.Type)
             {
-                Task.Factory.StartNew(() => OnHandStateChanged("You have just closed your hand!"));
-            }
-            else
-            {
-                Task.Factory.StartNew(() => OnHandStateChanged("You have just openned your hand!"));
+                case HandCloseEvent.OPEN:
+                    Task.Factory.StartNew(() => OnHandStateChanged("You have just openned your hand!"));
+                    System.Diagnostics.Debug.WriteLine("hand open");
+                    break;
+                case HandCloseEvent.CLOSE:
+                    Task.Factory.StartNew(() => OnHandStateChanged("You have just closed your hand!"));
+                    System.Diagnostics.Debug.WriteLine("hand close");
+                    break;
             }
         }
 

@@ -72,7 +72,8 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="MyLeap\Listener\LeapEvent.cs" />
+    <Compile Include="MyLeap\Event\HandCloseEvent.cs" />
+    <Compile Include="MyLeap\Event\LeapEvent.cs" />
     <Compile Include="MyLeap\Listener\LeapListenerClap.cs" />
     <Compile Include="MyLeap\Listener\LeapListenerOneHandPosition.cs" />
     <Compile Include="MyLeap\Listener\LeapListenerTwoHandManipulation.cs" />

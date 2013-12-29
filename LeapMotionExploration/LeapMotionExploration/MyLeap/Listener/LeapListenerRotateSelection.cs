@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Leap;
 using MyLeap.Processor;
+using MyLeap.Event;
 
 namespace MyLeap.Listener
 {
@@ -28,6 +29,7 @@ namespace MyLeap.Listener
 
             processorLeftHandClosed = new LeapProcessorHandClosed();
             processorLeftHandClosed.onHandStateChange += mostLeftHandStateChanged;
+            processorLeftHandClosed.onStateChange += (x) => { };
 
             processorHandRoll = new LeapProcessorTwoHandRoll();
             processorHandRoll.onAngleChanged += rollAngleChanged;
@@ -44,7 +46,7 @@ namespace MyLeap.Listener
 
                 if (isLeftHandClosed && frame.Hands.Count == 2)
                 {
-                    processorHandRoll.process(frame.Hands.Leftmost, frame.Hands.Rightmost);                 
+                    processorHandRoll.process(frame.Hands.Leftmost, frame.Hands.Rightmost);
                 }
 
             }
@@ -52,7 +54,7 @@ namespace MyLeap.Listener
 
         public void rollAngleChanged(float newRoll)
         {
-            if(lastRoll != 0)
+            if (lastRoll != 0)
             {
                 if (newRoll > lastRoll)
                 {
@@ -68,19 +70,20 @@ namespace MyLeap.Listener
             lastRoll = newRoll;
         }
 
-        public void mostLeftHandStateChanged(Boolean isClosed)
-        {            
-            isLeftHandClosed = isClosed;
-            if (isClosed)
+        public void mostLeftHandStateChanged(HandCloseEvent handClose)
+        {
+            int type = handClose.Type;
+            switch (type)
             {
-                System.Diagnostics.Debug.WriteLine("Selection Started !");
-                lastRoll = 0f;
-                Task.Factory.StartNew(() => OnSelectionChanged(SELECTION_START));
-            }
-            else
-            {
-                System.Diagnostics.Debug.WriteLine("Selection Ended !");
-                Task.Factory.StartNew(() => OnSelectionChanged(SELECTION_END));
+                case HandCloseEvent.OPEN:
+                    System.Diagnostics.Debug.WriteLine("Selection Started !");
+                    lastRoll = 0f;
+                    Task.Factory.StartNew(() => OnSelectionChanged(SELECTION_START));
+                    break;
+                case HandCloseEvent.CLOSE:
+                    System.Diagnostics.Debug.WriteLine("Selection Ended !");
+                    Task.Factory.StartNew(() => OnSelectionChanged(SELECTION_END));
+                    break;
             }
         }
     }

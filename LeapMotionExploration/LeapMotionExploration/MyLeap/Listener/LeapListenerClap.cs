@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Leap;
 using System.Windows;
+using MyLeap.Event;
 
 
 namespace MyLeap.Listener

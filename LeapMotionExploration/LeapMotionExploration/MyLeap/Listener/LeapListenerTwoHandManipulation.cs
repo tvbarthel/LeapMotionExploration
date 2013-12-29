@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Leap;
 using MyLeap.Processor;
+using MyLeap.Event;
 
 namespace MyLeap.Listener
 {
@@ -32,9 +33,11 @@ namespace MyLeap.Listener
 
             processorLeftHandClosed = new LeapProcessorHandClosed();
             processorLeftHandClosed.onHandStateChange += mostLeftHandStateChanged;
+            processorLeftHandClosed.onStateChange += (x) => { };
 
             processorRightHandClosed = new LeapProcessorHandClosed();
             processorRightHandClosed.onHandStateChange += mostRightHandStateChanged;
+            processorRightHandClosed.onStateChange += (x) => { };
 
             processorHandRoll = new LeapProcessorTwoHandRoll(0.01f);
             processorHandRoll.onAngleChanged += rollAngleChanged;
@@ -112,14 +115,14 @@ namespace MyLeap.Listener
             lastRoll = newRoll;
         }
 
-        public void mostLeftHandStateChanged(Boolean isClosed)
+        public void mostLeftHandStateChanged(HandCloseEvent e)
         {            
-            isLeftHandClosed = isClosed;
+            isLeftHandClosed = e.Type.Equals(HandCloseEvent.OPEN) ? true : false;
         }
 
-        public void mostRightHandStateChanged(Boolean isClosed)
+        public void mostRightHandStateChanged(HandCloseEvent e)
         {
-            isRightHandClosed = isClosed;
+            isRightHandClosed = e.Type.Equals(HandCloseEvent.OPEN) ? true : false;
         }
     }
 }

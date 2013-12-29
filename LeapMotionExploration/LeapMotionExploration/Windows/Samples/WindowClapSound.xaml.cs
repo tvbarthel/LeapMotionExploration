@@ -13,6 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using Leap;
 using MyLeap.Listener;
+using MyLeap.Event;
 
 namespace LeapMotionExploration.Windows.Samples
 {
