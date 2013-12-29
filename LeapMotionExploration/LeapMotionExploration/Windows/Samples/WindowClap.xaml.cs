@@ -46,7 +46,7 @@ namespace LeapMotionExploration.Windows.Samples
             }));
         }
 
-        private void OnClapReceive(Leap.Vector eventPosition)
+        private void OnClapReceive(LeapEvent clapEvent)
         {
             Application.Current.Dispatcher.Invoke(new Action(() =>
             {

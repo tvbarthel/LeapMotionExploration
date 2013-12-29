@@ -34,7 +34,7 @@ namespace MyLeap.Listener
         private double mHandsDist;
         private bool mIsClappedIn;
 
-        public event Action<Leap.Vector> OnClapDetected;
+        public event Action<LeapEvent> OnClapDetected;
         public event Action<String> OnStateChange;
 
         public LeapListenerClap()
@@ -73,7 +73,7 @@ namespace MyLeap.Listener
                     mIsClappedIn = true;
                     System.Diagnostics.Debug.WriteLine("CLAP IN");
                     Leap.Vector eventPosition = (mRightHand.PalmPosition.Normalized + mLeftHand.PalmPosition.Normalized) / 2;
-                    Task.Factory.StartNew(() => OnClapDetected(eventPosition));
+                    Task.Factory.StartNew(() => OnClapDetected(new LeapEvent(eventPosition)));
                 }
 
                 //Clap out condition
