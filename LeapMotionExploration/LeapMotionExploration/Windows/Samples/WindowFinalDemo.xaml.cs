@@ -11,6 +11,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using MyLeap.Event;
 
 namespace LeapMotionExploration.Windows.Samples
 {
@@ -22,6 +23,40 @@ namespace LeapMotionExploration.Windows.Samples
         public WindowFinalDemo()
         {
             InitializeComponent();
+        }
+
+        private void OnHandClosed(HandCloseEvent e)
+        {
+            switch (e.Type)
+            {
+                case HandCloseEvent.OPEN:
+                    //TODO if closed & dragging called DragFinished
+                    break;
+                case HandCloseEvent.CLOSE:
+                    //TODO check the event position to know if an Ui element has been selected
+                    break;
+            }
+        }
+
+        private void DragStarted()
+        {
+            //TODO inform drag started
+            //TODO store original position of the element
+
+        }
+
+        private void DragMoved()
+        {
+            //TODO get the cursor position
+            //TODO calculate the offset
+            //TODO update the element position
+
+        }
+
+        private void DragFinished(bool cancelled)
+        {
+            //TODO inform drag stop
+            //if cancelled reset position with original position
         }
     }
 }
