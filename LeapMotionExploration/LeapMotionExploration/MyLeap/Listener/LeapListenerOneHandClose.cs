@@ -12,7 +12,7 @@ namespace MyLeap.Listener
 {
     class LeapListenerOneHandClose : Leap.Listener
     {
-        public event Action<HandCloseEvent> OnHandStateChanged;
+        public event Action<HandCloseEvent> OnHandStateChange;
         private LeapProcessorHandClosed detector;
         private int HandPreference;
 
@@ -46,7 +46,7 @@ namespace MyLeap.Listener
 
         public void mostLeftHandStateChanged(HandCloseEvent e)
         {
-            Task.Factory.StartNew(() => OnHandStateChanged(e));
+            Task.Factory.StartNew(() => OnHandStateChange(e));
         }
 
     }

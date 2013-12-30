@@ -30,9 +30,18 @@ namespace LeapMotionExploration.Windows.Samples
         private LeapListenerOneHandPosition CursorListener;
         private LeapListenerOneHandClose HandCloseListener;
 
+        private Shape _hoveredShape;
+
+        //drag motion
+        private bool _isDragging;
+        private Point _originalShapePoint;
+        private Point _startCursorPoint;
+
         public WindowFinalDemo()
         {
             InitializeComponent();
+
+            _isDragging = false;
             Controller = new Controller();
 
             CursorListener = new LeapListenerOneHandPosition(LeapUtils.LEFT_MOST_HAND);
@@ -41,9 +50,19 @@ namespace LeapMotionExploration.Windows.Samples
 
             HandCloseListener = new LeapListenerOneHandClose(LeapUtils.LEFT_MOST_HAND);
             Controller.AddListener(HandCloseListener);
-            HandCloseListener.OnHandStateChanged += this.OnHandClosed;
+            HandCloseListener.OnHandStateChange += this.OnHandClosed;
 
             Shapes = new List<Shape>();
+
+            Rectangle rect1 = new Rectangle();
+            rect1.Height = rect1.Width = 32;
+            rect1.Fill = Brushes.Blue;
+            Canvas.SetTop(rect1, 100);
+            Canvas.SetLeft(rect1, 100);
+
+            cursorContainer.Children.Add(rect1);
+            Shapes.Add(rect1);
+
         }
 
         private void OnPositionChange(LeapEvent leapEvent)
@@ -53,6 +72,7 @@ namespace LeapMotionExploration.Windows.Samples
 
         private void setCursorPosition(Leap.Vector position)
         {
+
             Application.Current.Dispatcher.Invoke(new Action(() =>
             {
                 double posX = cursorContainer.ActualWidth * position.x;
@@ -60,8 +80,17 @@ namespace LeapMotionExploration.Windows.Samples
                 leapCursor.SetValue(Canvas.TopProperty, posY - leapCursor.Height / 2);
                 leapCursor.SetValue(Canvas.LeftProperty, posX - leapCursor.Width / 2);
 
-                updateHover(posX, posY);
+                if (_isDragging)
+                {
+                    DragMoved();
+                }
+                else
+                {
+                    updateHover(posX, posY);
+                }
+               
             }));
+
         }
 
 
@@ -83,6 +112,7 @@ namespace LeapMotionExploration.Windows.Samples
 
         private void resetShapeHover(Shape shape)
         {
+            _hoveredShape = null;
             Application.Current.Dispatcher.Invoke(new Action(() =>
             {
                 shape.Opacity = 1;
@@ -91,6 +121,7 @@ namespace LeapMotionExploration.Windows.Samples
 
         private void setShapeHover(Shape shape)
         {
+            _hoveredShape = shape;
             Application.Current.Dispatcher.Invoke(new Action(() =>
             {
                 shape.Opacity = 0.5;
@@ -101,7 +132,7 @@ namespace LeapMotionExploration.Windows.Samples
         {
             double shapeTop = (double)shape.GetValue(Canvas.TopProperty);
             double shapeLeft = (double)shape.GetValue(Canvas.LeftProperty);
-            return (posX > shapeLeft && posX < (shapeLeft + shape.ActualWidth) && posY > shapeTop && posY < (shapeTop + shape.ActualHeight));            
+            return (posX > shapeLeft && posX < (shapeLeft + shape.ActualWidth) && posY > shapeTop && posY < (shapeTop + shape.ActualHeight));
         }
 
         protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
@@ -117,41 +148,81 @@ namespace LeapMotionExploration.Windows.Samples
             {
                 case HandCloseEvent.OPEN:
                     //TODO if closed & dragging called DragFinished
-                    Application.Current.Dispatcher.Invoke(new Action(() =>
+                    if (_isDragging)
                     {
-                        leapCursor.Fill = new SolidColorBrush(Color.FromArgb(0, 0, 0, 0));
-                    }));
+                        DragFinished(false);
+                    }
+
                     break;
                 case HandCloseEvent.CLOSE:
                     //TODO check the event position to know if an Ui element has been selected
-                    Application.Current.Dispatcher.Invoke(new Action(() =>
+                    if (!_isDragging & _hoveredShape != null)
                     {
-                        leapCursor.Fill = new SolidColorBrush(Color.FromArgb(255, 255, 255, 0));
-
-                    }));
+                        DragStarted();
+                    }
                     break;
             }
         }
 
         private void DragStarted()
         {
-            //TODO inform drag started
-            //TODO store original position of the element
+
+            Application.Current.Dispatcher.Invoke(new Action(() =>
+            {
+
+                //Inform drag started
+                _isDragging = true;
+
+                //Store original position of the element, in case of cancel
+                _originalShapePoint = new Point(Canvas.GetLeft(_hoveredShape), Canvas.GetTop(_hoveredShape));
+
+                //Store starting Point
+                _startCursorPoint = new Point(Canvas.GetLeft(leapCursor), Canvas.GetTop(leapCursor));
+
+                System.Diagnostics.Debug.WriteLine("DragStarted");
+
+                //ui
+                leapCursor.Fill = new SolidColorBrush(Color.FromArgb(255, 255, 255, 0));
+
+            }));
 
         }
 
         private void DragMoved()
         {
-            //TODO get the cursor position
-            //TODO calculate the offset
-            //TODO update the element position
+
+            Application.Current.Dispatcher.Invoke(new Action(() =>
+            {
+
+                //Get the current cursor position
+                Point current = new Point(Canvas.GetLeft(leapCursor), Canvas.GetTop(leapCursor));
+
+
+                //Calculate the offset
+                Point offset = new Point(_startCursorPoint.X - current.X, _startCursorPoint.Y - current.Y);
+
+
+                //Update the element position
+                Canvas.SetTop(_hoveredShape, _originalShapePoint.Y - offset.Y);
+                Canvas.SetLeft(_hoveredShape, _originalShapePoint.X - offset.X);
+            }));
 
         }
 
         private void DragFinished(bool cancelled)
         {
-            //TODO inform drag stop
-            //if cancelled reset position with original position
+            
+            Application.Current.Dispatcher.Invoke(new Action(() =>
+            {
+                //Inform drag stop
+                _isDragging = false;
+
+                //if cancelled reset position with original position
+                System.Diagnostics.Debug.WriteLine("DragFinished");
+
+                //ui
+                leapCursor.Fill = new SolidColorBrush(Color.FromArgb(0, 0, 0, 0));
+            }));
         }
     }
 }

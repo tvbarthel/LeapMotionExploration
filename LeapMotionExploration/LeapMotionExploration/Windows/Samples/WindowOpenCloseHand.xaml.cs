@@ -34,7 +34,7 @@ namespace LeapMotionExploration
             mListener = new LeapListenerOneHandClose();
             mController.AddListener(mListener);
 
-            mListener.OnHandStateChanged += this.onHandClosed;
+            mListener.OnHandStateChange += this.onHandClosed;
 
 
         }
