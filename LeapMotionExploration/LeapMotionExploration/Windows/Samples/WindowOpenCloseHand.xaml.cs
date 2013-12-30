@@ -13,6 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using Leap;
 using MyLeap.Listener;
+using MyLeap.Event;
 
 namespace LeapMotionExploration
 {
@@ -38,12 +39,29 @@ namespace LeapMotionExploration
 
         }
 
-        private void onHandClosed(string message)
+        private void onHandClosed(HandCloseEvent e)
         {
-            Application.Current.Dispatcher.Invoke(new Action(() =>
+            String message = null;
+
+            switch (e.Type)
             {
-                textBlockMessage.Text = message;
-            }));
+                case HandCloseEvent.OPEN:
+                    message = "You have just openned your hand!";
+                    System.Diagnostics.Debug.WriteLine("hand open");
+                    break;
+                case HandCloseEvent.CLOSE:
+                    message = "You have just closed your hand!";
+                    System.Diagnostics.Debug.WriteLine("hand close");
+                    break;
+            }
+
+            if (message != null)
+            {
+                Application.Current.Dispatcher.Invoke(new Action(() =>
+                {
+                    textBlockMessage.Text = message;
+                }));
+            }            
         }
 
         protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
