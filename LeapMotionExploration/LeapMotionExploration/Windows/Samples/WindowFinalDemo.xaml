@@ -12,18 +12,47 @@
         <!-- Left Menu -->
         
         <!-- Color Picker Item -->
-        <Rectangle x:Name="colorPicker" Width="80" Height="80" Fill="#d3d3d3" Canvas.Left="10" >
+        <Rectangle x:Name="colorPickerBackground" Width="120" Height="120" Fill="#d3d3d3" Canvas.Left="10" >
             <Canvas.Top>
                 <MultiBinding Converter="{StaticResource leftMenuItemPositionConverter}">
-                    <Binding ElementName="cursorContainer" Path="ActualHeight"/>                    <Binding ElementName="colorPicker" Path="ActualHeight" />                    <Binding>                        <Binding.Source>                            <sys:Double>-80</sys:Double>                        </Binding.Source>                    </Binding>                </MultiBinding>
+                    <Binding ElementName="cursorContainer" Path="ActualHeight"/>
+                    <Binding ElementName="colorPickerBackground" Path="ActualHeight" />
+                    <Binding>
+                        <Binding.Source>
+                            <sys:Double>-80</sys:Double>
+                        </Binding.Source>
+                    </Binding>
+                </MultiBinding>
             </Canvas.Top>
         </Rectangle>
+
+        <Rectangle x:Name="colorPicker" Width="100" Height="100" Fill="#AA66CC" Canvas.Left="20">
+            <Canvas.Top>
+                <MultiBinding Converter="{StaticResource leftMenuItemPositionConverter}">
+                    <Binding ElementName="cursorContainer" Path="ActualHeight"/>
+                    <Binding ElementName="colorPicker" Path="ActualHeight" />
+                    <Binding>
+                        <Binding.Source>
+                            <sys:Double>-80</sys:Double>
+                        </Binding.Source>
+                    </Binding>
+                </MultiBinding>                
+            </Canvas.Top>
+        </Rectangle>
+
 
         <!-- Shape Picker Item -->
         <Rectangle x:Name="shapePicker" Width="80" Height="80" Fill="#d3d3d3" Canvas.Left="10" >
             <Canvas.Top>
                 <MultiBinding Converter="{StaticResource leftMenuItemPositionConverter}">
-                    <Binding ElementName="cursorContainer" Path="ActualHeight"/>                    <Binding ElementName="shapePicker" Path="ActualHeight" />                    <Binding>                        <Binding.Source>                            <sys:Double>80</sys:Double>                        </Binding.Source>                    </Binding>                </MultiBinding>
+                    <Binding ElementName="cursorContainer" Path="ActualHeight"/>
+                    <Binding ElementName="shapePicker" Path="ActualHeight" />
+                    <Binding>
+                        <Binding.Source>
+                            <sys:Double>80</sys:Double>
+                        </Binding.Source>
+                    </Binding>
+                </MultiBinding>
             </Canvas.Top>
         </Rectangle>
 
