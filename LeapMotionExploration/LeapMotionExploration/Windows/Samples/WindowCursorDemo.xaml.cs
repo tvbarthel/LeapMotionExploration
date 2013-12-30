@@ -14,6 +14,7 @@ using System.Windows.Shapes;
 using Leap;
 using MyLeap.Listener;
 using MyLeap.Utils;
+using MyLeap.Event;
 
 namespace LeapMotionExploration.Windows.Samples
 {
@@ -41,7 +42,7 @@ namespace LeapMotionExploration.Windows.Samples
             mListener = new LeapListenerOneHandPosition(handPreference);
             mController.AddListener(mListener);
 
-            mListener.OnPositionRecieve += this.OnNormalizedPositionRecieve;
+            mListener.OnStateChange += this.OnNormalizedPositionRecieve;
 
             if (handPreference == LeapUtils.RIGHT_MOST_HAND)
             {
@@ -54,10 +55,11 @@ namespace LeapMotionExploration.Windows.Samples
             
         }
 
-        private void OnNormalizedPositionRecieve(Leap.Vector normalizedPosition)
-        {
+        private void OnNormalizedPositionRecieve(LeapEvent leapEvent)
+        {           
             Application.Current.Dispatcher.Invoke(new Action(() =>
             {
+                Leap.Vector normalizedPosition = leapEvent.Position;
                 var cursorSize = 10 + 60 * normalizedPosition.z;
                 leapCursor.Width = cursorSize;
                 leapCursor.Height = cursorSize;

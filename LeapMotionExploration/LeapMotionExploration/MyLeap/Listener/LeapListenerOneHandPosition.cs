@@ -6,15 +6,16 @@ using System.Threading.Tasks;
 using Leap;
 using MyLeap.Utils;
 using MyLeap.Processor;
+using MyLeap.Event;
 
 namespace MyLeap.Listener
 {
     class LeapListenerOneHandPosition : Leap.Listener
     {
 
-        public event Action<Vector> OnPositionRecieve;
-        private LeapProcessorHandPosition processorHandPosition;
+        public event Action<LeapEvent> OnStateChange;
 
+        private LeapProcessorHandPosition processorHandPosition;
         private int HandPreference;
 
         public LeapListenerOneHandPosition(int handPreference)
@@ -45,7 +46,7 @@ namespace MyLeap.Listener
 
         public void OnPositionChange(Vector position)
         {
-            Task.Factory.StartNew(() => OnPositionRecieve(position));
+            Task.Factory.StartNew(() => OnStateChange(new LeapEvent(position, LeapEvent.POSITION)));
         }
 
         public void setHandPreference(int handPreference)

@@ -14,6 +14,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Leap;
 using MyLeap.Listener;
+using MyLeap.Event;
 
 namespace LeapMotionExploration
 {
@@ -34,14 +35,15 @@ namespace LeapMotionExploration
             mListener = new LeapListenerOneHandPosition();
             mController.AddListener(mListener);
 
-            mListener.OnPositionRecieve += this.OnNormalizedPositionRecieve;
+            mListener.OnStateChange += this.OnNormalizedPositionRecieve;
 
         }
 
-        private void OnNormalizedPositionRecieve(Leap.Vector normalizedPosition)
+        private void OnNormalizedPositionRecieve(LeapEvent leapEvent)
         {
             Application.Current.Dispatcher.Invoke(new Action(() =>
             {
+                Leap.Vector normalizedPosition = leapEvent.Position;
                 byte redValue = (byte)(255 * normalizedPosition.x);
                 byte greenValue = (byte)(255 * normalizedPosition.y);
                 byte blueValue = (byte)(255 * normalizedPosition.z);
