@@ -16,6 +16,12 @@ namespace MyLeap.Event
         public const int ROTATION_SELECTION_PREVIOUS = 3;
         public const int ROTATION_SELECTION_END = 4;
 
+        //Transformation
+        public const int TRANSFORMATION_SIZE_UP = 5;
+        public const int TRANSFORMATION_SIZE_DOWN = 6;
+        public const int TRANSFORMATION_ROTATE_CLOCKWIZE = 7;
+        public const int TRANSFORMATION_ROTATE_UNCLOCKWIZE = 8;
+
         public Leap.Vector Position;
         public int Type;
 
