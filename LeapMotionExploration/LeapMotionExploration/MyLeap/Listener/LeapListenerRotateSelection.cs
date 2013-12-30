@@ -6,20 +6,18 @@ using System.Threading.Tasks;
 using Leap;
 using MyLeap.Processor;
 using MyLeap.Event;
+using MyLeap.Utils;
 
 namespace MyLeap.Listener
 {
     class LeapListenerRotateSelection : Leap.Listener
     {
 
-        public event Action<int> OnSelectionChanged;
-        public const int SELECTION_START = 0;
-        public const int SELECTION_NEXT = 1;
-        public const int SELECTION_PREVIOUS = 2;
-        public const int SELECTION_END = 3;
+        public event Action<LeapEvent> OnStateChange;
 
         private LeapProcessorHandClosed processorLeftHandClosed;
         private LeapProcessorTwoHandRoll processorHandRoll;
+        private Vector ClosePosition;
         private Boolean isLeftHandClosed;
         private float lastRoll;
 
@@ -59,12 +57,13 @@ namespace MyLeap.Listener
                 if (newRoll > lastRoll)
                 {
                     System.Diagnostics.Debug.WriteLine("Select Next !");
-                    Task.Factory.StartNew(() => OnSelectionChanged(SELECTION_NEXT));
+                    Task.Factory.StartNew(() => OnStateChange(new LeapEvent(ClosePosition, LeapEvent.ROTATION_SELECTION_NEXT)));
+                    
                 }
                 else
                 {
                     System.Diagnostics.Debug.WriteLine("Select Previous !");
-                    Task.Factory.StartNew(() => OnSelectionChanged(SELECTION_PREVIOUS));
+                    Task.Factory.StartNew(() => OnStateChange(new LeapEvent(ClosePosition, LeapEvent.ROTATION_SELECTION_PREVIOUS)));
                 }
             }
             lastRoll = newRoll;
@@ -75,14 +74,18 @@ namespace MyLeap.Listener
             int type = handClose.Type;
             switch (type)
             {
-                case HandCloseEvent.OPEN:
-                    System.Diagnostics.Debug.WriteLine("Selection Started !");
-                    lastRoll = 0f;
-                    Task.Factory.StartNew(() => OnSelectionChanged(SELECTION_START));
-                    break;
                 case HandCloseEvent.CLOSE:
+                    System.Diagnostics.Debug.WriteLine("Selection Started !");
+                    isLeftHandClosed = true;
+                    ClosePosition = handClose.Position;
+                    lastRoll = 0f;
+                    Task.Factory.StartNew(() => OnStateChange(new LeapEvent(ClosePosition, LeapEvent.ROTATION_SELECTION_START)));
+                    break;
+                case HandCloseEvent.OPEN:
                     System.Diagnostics.Debug.WriteLine("Selection Ended !");
-                    Task.Factory.StartNew(() => OnSelectionChanged(SELECTION_END));
+                    isLeftHandClosed = false;                    
+                    Task.Factory.StartNew(() => OnStateChange(new LeapEvent(ClosePosition, LeapEvent.ROTATION_SELECTION_END)));
+                    ClosePosition = null;
                     break;
             }
         }

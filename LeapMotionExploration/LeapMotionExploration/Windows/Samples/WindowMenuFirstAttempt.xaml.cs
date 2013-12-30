@@ -13,6 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using Leap;
 using MyLeap.Listener;
+using MyLeap.Event;
 
 namespace LeapMotionExploration
 {
@@ -36,23 +37,23 @@ namespace LeapMotionExploration
             mController = new Controller();
             mListener = new LeapListenerRotateSelection();
             mController.AddListener(mListener);
-            mListener.OnSelectionChanged += OnSelectionChanged;
+            mListener.OnStateChange += OnSelectionChanged;
         }
 
-        public void OnSelectionChanged(int selectionEvent)
+        public void OnSelectionChanged(LeapEvent leapEvent)
         {
-            switch (selectionEvent)
+            switch (leapEvent.Type)
             {
-                case LeapListenerRotateSelection.SELECTION_START:
+                case LeapEvent.ROTATION_SELECTION_START:
                     setMenuVisibility(Visibility.Visible);
                     break;
-                case LeapListenerRotateSelection.SELECTION_END:
+                case LeapEvent.ROTATION_SELECTION_END:
                     setMenuVisibility(Visibility.Hidden);
                     break;
-                case LeapListenerRotateSelection.SELECTION_NEXT:
+                case LeapEvent.ROTATION_SELECTION_NEXT:
                     selectNext();
                     break;
-                case LeapListenerRotateSelection.SELECTION_PREVIOUS:
+                case LeapEvent.ROTATION_SELECTION_PREVIOUS:
                     selectPrevious();
                     break;
             }
