@@ -42,7 +42,21 @@
 
 
         <!-- Shape Picker Item -->
-        <Rectangle x:Name="shapePicker" Width="80" Height="80" Fill="#d3d3d3" Canvas.Left="10" >
+        <Rectangle x:Name="shapePickerBackground" Width="120" Height="120" Fill="#d3d3d3" Canvas.Left="10" >
+            <Canvas.Top>
+                <MultiBinding Converter="{StaticResource leftMenuItemPositionConverter}">
+                    <Binding ElementName="cursorContainer" Path="ActualHeight"/>
+                    <Binding ElementName="shapePickerBackground" Path="ActualHeight" />
+                    <Binding>
+                        <Binding.Source>
+                            <sys:Double>80</sys:Double>
+                        </Binding.Source>
+                    </Binding>
+                </MultiBinding>
+            </Canvas.Top>
+        </Rectangle>
+
+        <Ellipse x:Name="shapePicker" Width="100" Height="100" Stroke="#000000" StrokeThickness="2" Canvas.Left="20" >
             <Canvas.Top>
                 <MultiBinding Converter="{StaticResource leftMenuItemPositionConverter}">
                     <Binding ElementName="cursorContainer" Path="ActualHeight"/>
@@ -54,7 +68,7 @@
                     </Binding>
                 </MultiBinding>
             </Canvas.Top>
-        </Rectangle>
+        </Ellipse>
 
         <Rectangle Stroke="Black" StrokeThickness="2" Height="150" Width="150" Canvas.Top="100" Canvas.Right="100" Fill="#33000000" ClipToBounds="True"/>
         
