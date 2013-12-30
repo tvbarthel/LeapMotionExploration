@@ -26,6 +26,7 @@ namespace LeapMotionExploration.Windows.Samples
 
         private Controller Controller;
         private LeapListenerOneHandPosition Listener;
+        private List<Shape> Shapes;
 
         public WindowFinalDemo()
         {
@@ -36,6 +37,8 @@ namespace LeapMotionExploration.Windows.Samples
             Controller.AddListener(Listener);
 
             Listener.OnStateChange += this.OnPositionChange;
+
+            Shapes = new List<Shape>();
         }
 
         private void OnPositionChange(LeapEvent leapEvent)
@@ -47,11 +50,36 @@ namespace LeapMotionExploration.Windows.Samples
         {
             Application.Current.Dispatcher.Invoke(new Action(() =>
             {
-                double xPos = cursorContainer.ActualWidth * position.x - leapCursor.Width / 2;
-                double yPos = cursorContainer.ActualHeight * (1 - position.y) - leapCursor.Height / 2;
-                leapCursor.SetValue(Canvas.TopProperty, yPos);
-                leapCursor.SetValue(Canvas.LeftProperty, xPos);
+                double posX = cursorContainer.ActualWidth * position.x - leapCursor.Width / 2;
+                double posY = cursorContainer.ActualHeight * (1 - position.y) - leapCursor.Height / 2;
+                leapCursor.SetValue(Canvas.TopProperty, posY);
+                leapCursor.SetValue(Canvas.LeftProperty, posX);
+
+                checkHover(posX, posY);
             }));
+        }
+
+        private void checkHover(double posX, double posY)
+        {
+            foreach (Shape shape in Shapes)
+            {
+                if (isShapeHover(shape, posX, posY))
+                {
+                    setShapeHover(shape);
+                    break;
+                }
+            }
+        }
+
+        private void setShapeHover(Shape shape)
+        {
+            //TODO
+        }
+
+        private Boolean isShapeHover(Shape shape, double posX, double posY)
+        {
+            //TODO
+            return false;
         }
 
         protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
