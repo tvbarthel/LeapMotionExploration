@@ -44,6 +44,8 @@ namespace LeapMotionExploration.Windows.Samples
             HandCloseListener.OnHandStateChanged += this.OnHandClosed;
 
             Shapes = new List<Shape>();
+            Shapes.Add(colorPicker);
+            Shapes.Add(shapePicker);
         }
 
         private void OnPositionChange(LeapEvent leapEvent)
