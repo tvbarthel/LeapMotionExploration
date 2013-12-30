@@ -22,6 +22,9 @@ namespace MyLeap.Event
         public const int TRANSFORMATION_ROTATE_CLOCKWIZE = 7;
         public const int TRANSFORMATION_ROTATE_UNCLOCKWIZE = 8;
 
+        //Position
+        public const int POSITION = 9;
+
         public Leap.Vector Position;
         public int Type;
 
