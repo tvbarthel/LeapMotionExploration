@@ -23,7 +23,7 @@ namespace LeapMotionExploration
     public partial class WindowOpenCloseHand : Window
     {
         private Controller mController;
-        private LeapListenerCloseLeftHand mListener;
+        private LeapListenerOneHandClose mListener;
 
         public WindowOpenCloseHand()
         {
@@ -31,7 +31,7 @@ namespace LeapMotionExploration
 
             mController = new Controller();
 
-            mListener = new LeapListenerCloseLeftHand();
+            mListener = new LeapListenerOneHandClose();
             mController.AddListener(mListener);
 
             mListener.OnHandStateChanged += this.onHandClosed;
