@@ -25,19 +25,23 @@ namespace LeapMotionExploration.Windows.Samples
     {
 
         private Controller Controller;
-        private LeapListenerOneHandPosition Listener;
         //A list of the shapes present on the canvas.
         private List<Shape> Shapes;
+        private LeapListenerOneHandPosition CursorListener;
+        private LeapListenerOneHandClose HandCloseListener;
 
         public WindowFinalDemo()
         {
             InitializeComponent();
             Controller = new Controller();
 
-            Listener = new LeapListenerOneHandPosition(LeapUtils.LEFT_MOST_HAND);
-            Controller.AddListener(Listener);
+            CursorListener = new LeapListenerOneHandPosition(LeapUtils.LEFT_MOST_HAND);
+            Controller.AddListener(CursorListener);
+            CursorListener.OnStateChange += this.OnPositionChange;
 
-            Listener.OnStateChange += this.OnPositionChange;
+            HandCloseListener = new LeapListenerOneHandClose(LeapUtils.LEFT_MOST_HAND);
+            Controller.AddListener(HandCloseListener);
+            HandCloseListener.OnHandStateChanged += this.OnHandClosed;
 
             Shapes = new List<Shape>();
         }
@@ -102,7 +106,7 @@ namespace LeapMotionExploration.Windows.Samples
 
         protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
         {
-            Controller.RemoveListener(Listener);
+            Controller.RemoveListener(CursorListener);
             Controller.Dispose();
             base.OnClosing(e);
         }
@@ -113,9 +117,18 @@ namespace LeapMotionExploration.Windows.Samples
             {
                 case HandCloseEvent.OPEN:
                     //TODO if closed & dragging called DragFinished
+                    Application.Current.Dispatcher.Invoke(new Action(() =>
+                    {
+                        leapCursor.Fill = new SolidColorBrush(Color.FromArgb(0, 0, 0, 0));
+                    }));
                     break;
                 case HandCloseEvent.CLOSE:
                     //TODO check the event position to know if an Ui element has been selected
+                    Application.Current.Dispatcher.Invoke(new Action(() =>
+                    {
+                        leapCursor.Fill = new SolidColorBrush(Color.FromArgb(255, 255, 255, 0));
+
+                    }));
                     break;
             }
         }

@@ -4,5 +4,6 @@
         Title="WindowDemo" Height="300" Width="300">
     <Canvas x:Name="cursorContainer">
         <Ellipse x:Name="leapCursor" Stroke="Black" StrokeThickness="2" Height="15" Width="15" Fill="#33000000" ClipToBounds="True"/>
+        <Rectangle Stroke="Black" StrokeThickness="2" Height="150" Width="150" Canvas.Top="100" Canvas.Right="100" Fill="#33000000" ClipToBounds="True"/>
     </Canvas>
 </Window>
