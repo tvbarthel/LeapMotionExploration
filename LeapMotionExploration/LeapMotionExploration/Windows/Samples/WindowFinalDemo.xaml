@@ -19,7 +19,7 @@
                     <Binding ElementName="colorPickerBackground" Path="ActualHeight" />
                     <Binding>
                         <Binding.Source>
-                            <sys:Double>-80</sys:Double>
+                            <sys:Double>-115</sys:Double>
                         </Binding.Source>
                     </Binding>
                 </MultiBinding>
@@ -33,12 +33,27 @@
                     <Binding ElementName="colorPicker" Path="ActualHeight" />
                     <Binding>
                         <Binding.Source>
-                            <sys:Double>-80</sys:Double>
+                            <sys:Double>-115</sys:Double>
                         </Binding.Source>
                     </Binding>
                 </MultiBinding>                
             </Canvas.Top>
         </Rectangle>
+        
+        <!-- Preview -->
+        <Ellipse x:Name="preview" Width="100" Height="100" Fill="#AA66CC" Canvas.Left="75" >
+            <Canvas.Top>
+                <MultiBinding Converter="{StaticResource leftMenuItemPositionConverter}">
+                    <Binding ElementName="cursorContainer" Path="ActualHeight"/>
+                    <Binding ElementName="preview" Path="ActualHeight" />
+                    <Binding>
+                        <Binding.Source>
+                            <sys:Double>0</sys:Double>
+                        </Binding.Source>
+                    </Binding>
+                </MultiBinding>
+            </Canvas.Top>
+        </Ellipse>
 
 
         <!-- Shape Picker Item -->
@@ -49,7 +64,7 @@
                     <Binding ElementName="shapePickerBackground" Path="ActualHeight" />
                     <Binding>
                         <Binding.Source>
-                            <sys:Double>80</sys:Double>
+                            <sys:Double>115</sys:Double>
                         </Binding.Source>
                     </Binding>
                 </MultiBinding>
@@ -63,7 +78,7 @@
                     <Binding ElementName="shapePicker" Path="ActualHeight" />
                     <Binding>
                         <Binding.Source>
-                            <sys:Double>80</sys:Double>
+                            <sys:Double>115</sys:Double>
                         </Binding.Source>
                     </Binding>
                 </MultiBinding>

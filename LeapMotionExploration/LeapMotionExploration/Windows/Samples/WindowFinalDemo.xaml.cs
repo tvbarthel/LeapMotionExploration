@@ -46,6 +46,7 @@ namespace LeapMotionExploration.Windows.Samples
             Shapes = new List<Shape>();
             Shapes.Add(colorPicker);
             Shapes.Add(shapePicker);
+            Shapes.Add(preview);
         }
 
         private void OnPositionChange(LeapEvent leapEvent)
