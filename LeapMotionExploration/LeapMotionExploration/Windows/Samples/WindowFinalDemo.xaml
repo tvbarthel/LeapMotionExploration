@@ -1,8 +1,8 @@
 ﻿<Window x:Class="LeapMotionExploration.Windows.Samples.WindowFinalDemo"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="WindowDemo" Height="300" Width="300">
-    <Canvas x:Name="cursorContainer">
+        Title="WindowDemo" Height="500" Width="800">
+    <Canvas x:Name="cursorContainer" Background="#f9f9f9">
         <Ellipse x:Name="leapCursor" Stroke="Black" StrokeThickness="2" Height="15" Width="15" Fill="#33000000" ClipToBounds="True"/>
         <Rectangle Stroke="Black" StrokeThickness="2" Height="150" Width="150" Canvas.Top="100" Canvas.Right="100" Fill="#33000000" ClipToBounds="True"/>
     </Canvas>
