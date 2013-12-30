@@ -100,18 +100,27 @@ namespace LeapMotionExploration.Windows.Samples
 
         private void updateHover(double posX, double posY)
         {
-            foreach (Shape shape in Shapes)
+            if (_hoveredShape == null)
             {
-                if (isCursorOnShape(shape, posX, posY))
+                //no shape hovered, check if cursor entered one
+                foreach (Shape shape in Shapes)
                 {
-                    //TODO hover only one shape
-                    setShapeHover(shape);
-                }
-                else
-                {
-                    resetShapeHover(shape);
+                    if (isCursorOnShape(shape, posX, posY))
+                    {
+                        //TODO hover only one shape
+                        setShapeHover(shape);
+                    }
                 }
             }
+            else
+            {
+                //a shape is hovered, check if cursor left it
+                if (!isCursorOnShape(_hoveredShape, posX, posY))
+                {
+                    resetShapeHover(_hoveredShape);
+                }
+            }
+            
         }
 
         private void resetShapeHover(Shape shape)
@@ -160,7 +169,7 @@ namespace LeapMotionExploration.Windows.Samples
                     break;
                 case HandCloseEvent.CLOSE:
                     //TODO check the event position to know if an Ui element has been selected
-                    if (!_isDragging)
+                    if (!_isDragging && _hoveredShape!=null)
                     {
                         DragStarted();
                     }
