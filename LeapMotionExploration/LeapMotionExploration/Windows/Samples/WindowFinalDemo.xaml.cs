@@ -61,6 +61,10 @@ namespace LeapMotionExploration.Windows.Samples
             Canvas.SetLeft(rect1, 100);
 
             cursorContainer.Children.Add(rect1);
+            
+
+            Shapes.Add(colorPicker);
+            Shapes.Add(shapePicker);
             Shapes.Add(rect1);
 
         }
@@ -156,7 +160,7 @@ namespace LeapMotionExploration.Windows.Samples
                     break;
                 case HandCloseEvent.CLOSE:
                     //TODO check the event position to know if an Ui element has been selected
-                    if (!_isDragging & _hoveredShape != null)
+                    if (!_isDragging)
                     {
                         DragStarted();
                     }

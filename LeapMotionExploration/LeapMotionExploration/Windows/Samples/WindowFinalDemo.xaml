@@ -1,9 +1,35 @@
 ﻿<Window x:Class="LeapMotionExploration.Windows.Samples.WindowFinalDemo"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="WindowDemo" Height="300" Width="300">
-    <Canvas x:Name="cursorContainer">
-        <Ellipse x:Name="leapCursor" Stroke="Black" StrokeThickness="2" Height="15" Width="15" Fill="#33000000" ClipToBounds="True"/>
+        xmlns:localConverter="clr-namespace:LeapMotionExploration.Windows.Samples.Converter"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
+        Title="WindowDemo" Height="500" Width="800">
+    <Canvas x:Name="cursorContainer" Background="#f9f9f9">
+        <Canvas.Resources>
+            <localConverter:LeftMenuItemCanvasTopConverter x:Key="leftMenuItemPositionConverter" />
+        </Canvas.Resources>
+        
+        <!-- Left Menu -->
+        
+        <!-- Color Picker Item -->
+        <Rectangle x:Name="colorPicker" Width="80" Height="80" Fill="#d3d3d3" Canvas.Left="10" >
+            <Canvas.Top>
+                <MultiBinding Converter="{StaticResource leftMenuItemPositionConverter}">
+                    <Binding ElementName="cursorContainer" Path="ActualHeight"/>                    <Binding ElementName="colorPicker" Path="ActualHeight" />                    <Binding>                        <Binding.Source>                            <sys:Double>-80</sys:Double>                        </Binding.Source>                    </Binding>                </MultiBinding>
+            </Canvas.Top>
+        </Rectangle>
+
+        <!-- Shape Picker Item -->
+        <Rectangle x:Name="shapePicker" Width="80" Height="80" Fill="#d3d3d3" Canvas.Left="10" >
+            <Canvas.Top>
+                <MultiBinding Converter="{StaticResource leftMenuItemPositionConverter}">
+                    <Binding ElementName="cursorContainer" Path="ActualHeight"/>                    <Binding ElementName="shapePicker" Path="ActualHeight" />                    <Binding>                        <Binding.Source>                            <sys:Double>80</sys:Double>                        </Binding.Source>                    </Binding>                </MultiBinding>
+            </Canvas.Top>
+        </Rectangle>
+
         <Rectangle Stroke="Black" StrokeThickness="2" Height="150" Width="150" Canvas.Top="100" Canvas.Right="100" Fill="#33000000" ClipToBounds="True"/>
+        
+        <!-- Leap Cursor-->
+        <Ellipse x:Name="leapCursor" Stroke="Black" StrokeThickness="2" Height="15" Width="15" Fill="#33000000" ClipToBounds="True"/>
     </Canvas>
 </Window>

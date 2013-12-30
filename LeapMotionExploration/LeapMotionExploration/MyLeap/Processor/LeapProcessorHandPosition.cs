@@ -13,7 +13,7 @@ namespace MyLeap.Processor
 
         public void process(Hand hand)
         {
-            var palmPosition = hand.PalmPosition;
+            var palmPosition = hand.StabilizedPalmPosition;
             if (palmPosition.IsValid())
             {
                 var normalizedPosition = hand.Frame.InteractionBox.NormalizePoint(palmPosition, true);
