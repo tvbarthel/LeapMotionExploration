@@ -37,11 +37,17 @@ namespace LeapMotionExploration.Windows.Samples
         private Point _originalShapePoint;
         private Point _startCursorPoint;
 
+        private Point _currentCursorPoint;
+
         public WindowFinalDemo()
         {
             InitializeComponent();
 
             _isDragging = false;
+            _currentCursorPoint = new Point(0,0);
+            _originalShapePoint = new Point(0, 0);
+            _startCursorPoint = new Point(0, 0);
+
             Controller = new Controller();
 
             CursorListener = new LeapListenerOneHandPosition(LeapUtils.LEFT_MOST_HAND);
@@ -79,10 +85,10 @@ namespace LeapMotionExploration.Windows.Samples
 
             Application.Current.Dispatcher.Invoke(new Action(() =>
             {
-                double posX = cursorContainer.ActualWidth * position.x;
-                double posY = cursorContainer.ActualHeight * (1 - position.y);
-                leapCursor.SetValue(Canvas.TopProperty, posY - leapCursor.Height / 2);
-                leapCursor.SetValue(Canvas.LeftProperty, posX - leapCursor.Width / 2);
+                _currentCursorPoint.X = cursorContainer.ActualWidth * position.x;
+                _currentCursorPoint.Y = cursorContainer.ActualHeight * (1 - position.y);
+                leapCursor.SetValue(Canvas.TopProperty, _currentCursorPoint.Y - leapCursor.Height / 2);
+                leapCursor.SetValue(Canvas.LeftProperty, _currentCursorPoint.X - leapCursor.Width / 2);
 
                 if (_isDragging)
                 {
@@ -90,7 +96,7 @@ namespace LeapMotionExploration.Windows.Samples
                 }
                 else
                 {
-                    updateHover(posX, posY);
+                    updateHover(_currentCursorPoint.X, _currentCursorPoint.Y);
                 }
 
             }));
@@ -120,7 +126,6 @@ namespace LeapMotionExploration.Windows.Samples
                 Application.Current.Dispatcher.Invoke(new Action(() =>
                 {
                     _hoveredShape.Opacity = 1;
-                    _hoveredShape.StrokeThickness = 0;
                     _hoveredShape = null;
                 }));
             }
@@ -187,10 +192,12 @@ namespace LeapMotionExploration.Windows.Samples
                 _isDragging = true;
 
                 //Store original position of the element, in case of cancel
-                _originalShapePoint = new Point(Canvas.GetLeft(_hoveredShape), Canvas.GetTop(_hoveredShape));
+                _originalShapePoint.X = Canvas.GetLeft(_hoveredShape);
+                _originalShapePoint.Y = Canvas.GetTop(_hoveredShape);
 
                 //Store starting Point
-                _startCursorPoint = new Point(Canvas.GetLeft(leapCursor), Canvas.GetTop(leapCursor));
+                _startCursorPoint.X = _currentCursorPoint.X;
+                _startCursorPoint.Y = _currentCursorPoint.Y;
 
                 System.Diagnostics.Debug.WriteLine("DragStarted");
 
@@ -235,7 +242,15 @@ namespace LeapMotionExploration.Windows.Samples
 
                 //ui
                 leapCursor.Fill = new SolidColorBrush(Color.FromArgb(0, 0, 0, 0));
+
+                //TODO check drop area
+                if (isCursorOnShape(basket, _currentCursorPoint.X, _currentCursorPoint.Y))
+                {
+                    Shapes.Remove(_hoveredShape);
+                    cursorContainer.Children.Remove(_hoveredShape);
+                }
             }));
         }
+
     }
 }
