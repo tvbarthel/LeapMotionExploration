@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace MyLeap.Event
 {
-    class LeapEvent
+    public class LeapEvent
     {
         public const int NONE = 0;
 
