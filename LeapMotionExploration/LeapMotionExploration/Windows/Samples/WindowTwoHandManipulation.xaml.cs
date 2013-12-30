@@ -13,6 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using Leap;
 using MyLeap.Listener;
+using MyLeap.Event;
 
 namespace LeapMotionExploration
 {
@@ -33,7 +34,7 @@ namespace LeapMotionExploration
             mController = new Controller();
             mListener = new LeapListenerTwoHandManipulation();
             mController.AddListener(mListener);
-            mListener.OnAction += OnAction;
+            mListener.OnStateChange += OnStateChange;
 
             currentRotation = 0;
             setRotation();
@@ -42,28 +43,28 @@ namespace LeapMotionExploration
             setSize();
         }
 
-        public void OnAction(int action)
+        public void OnStateChange(LeapEvent leapEvent)
         {
-            if (action == LeapListenerTwoHandManipulation.ACTION_ROTATE_CLOCKWIZE)
+            switch (leapEvent.Type)
             {
-                currentRotation += 3;
-                setRotation();
-            }
-            else if (action == LeapListenerTwoHandManipulation.ACTION_ROTATE_UNCLOCKWIZE)
-            {
-                currentRotation -= 3;
-                setRotation();
-            }
-            else if (action == LeapListenerTwoHandManipulation.ACTION_SIZE_UP)
-            {
-                currentSize += 3;
-                setSize();
-            }
-            else if (action == LeapListenerTwoHandManipulation.ACTION_SIZE_DOWN)
-            {
-                currentSize -= 3;
-                setSize();
-            }
+                case LeapEvent.TRANSFORMATION_ROTATE_CLOCKWIZE:
+                    currentRotation += 3;
+                    setRotation();
+                    break;
+
+                case LeapEvent.TRANSFORMATION_ROTATE_UNCLOCKWIZE:
+                    currentRotation -= 3;
+                    setRotation();
+                    break;
+                case LeapEvent.TRANSFORMATION_SIZE_UP:
+                    currentSize += 3;
+                    setSize();
+                    break;
+                case LeapEvent.TRANSFORMATION_SIZE_DOWN:
+                    currentSize -= 3;
+                    setSize();
+                    break;
+            }            
         }
 
         private void setSize()

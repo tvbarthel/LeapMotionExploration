@@ -11,16 +11,13 @@ namespace MyLeap.Listener
 {
     class LeapListenerTwoHandManipulation : Leap.Listener
     {
-        public event Action<int> OnAction;
-        public const int ACTION_SIZE_UP = 0;
-        public const int ACTION_SIZE_DOWN = 1;
-        public const int ACTION_ROTATE_CLOCKWIZE = 2;
-        public const int ACTION_ROTATE_UNCLOCKWIZE = 3;
+        public event Action<LeapEvent> OnStateChange;
         
         private LeapProcessorHandClosed processorLeftHandClosed;
         private LeapProcessorHandClosed processorRightHandClosed;
         private LeapProcessorTwoHandRoll processorHandRoll;
         private LeapProcessorTwoHandDistance processorHandDistance;
+        private Vector ClosePosition;
         private Boolean isLeftHandClosed;
         private Boolean isRightHandClosed;
         private float lastRoll;
@@ -86,12 +83,12 @@ namespace MyLeap.Listener
                 if (newDistance > lastDistance)
                 {
                     System.Diagnostics.Debug.WriteLine("Size increases !");
-                    Task.Factory.StartNew(() => OnAction(ACTION_SIZE_UP));
+                    Task.Factory.StartNew(() => OnStateChange(new LeapEvent(ClosePosition, LeapEvent.TRANSFORMATION_SIZE_UP)));                    
                 }
                 else
                 {
                     System.Diagnostics.Debug.WriteLine("Size decrease !");
-                    Task.Factory.StartNew(() => OnAction(ACTION_SIZE_DOWN));
+                    Task.Factory.StartNew(() => OnStateChange(new LeapEvent(ClosePosition, LeapEvent.TRANSFORMATION_SIZE_DOWN)));
                 }
             }
             lastDistance = newDistance;
@@ -104,25 +101,33 @@ namespace MyLeap.Listener
                 if (newRoll > lastRoll)
                 {
                     System.Diagnostics.Debug.WriteLine("Rotate Unclockwize !");
-                    Task.Factory.StartNew(() => OnAction(ACTION_ROTATE_UNCLOCKWIZE));
+                    Task.Factory.StartNew(() => OnStateChange(new LeapEvent(ClosePosition, LeapEvent.TRANSFORMATION_ROTATE_UNCLOCKWIZE)));
                 }
                 else
                 {
                     System.Diagnostics.Debug.WriteLine("Rotate Clocksize !");
-                    Task.Factory.StartNew(() => OnAction(ACTION_ROTATE_CLOCKWIZE));
+                    Task.Factory.StartNew(() => OnStateChange(new LeapEvent(ClosePosition, LeapEvent.TRANSFORMATION_ROTATE_CLOCKWIZE)));
                 }
             }
             lastRoll = newRoll;
         }
 
         public void mostLeftHandStateChanged(HandCloseEvent e)
-        {            
-            isLeftHandClosed = e.Type.Equals(HandCloseEvent.OPEN) ? true : false;
+        {
+            isLeftHandClosed = e.Type.Equals(HandCloseEvent.OPEN) ? false : true;
+            if (isLeftHandClosed)
+            {
+                ClosePosition = e.Position;
+            }
+            else
+            {
+                ClosePosition = null;
+            }
         }
 
         public void mostRightHandStateChanged(HandCloseEvent e)
         {
-            isRightHandClosed = e.Type.Equals(HandCloseEvent.OPEN) ? true : false;
+            isRightHandClosed = e.Type.Equals(HandCloseEvent.OPEN) ? false : true;
         }
     }
 }
