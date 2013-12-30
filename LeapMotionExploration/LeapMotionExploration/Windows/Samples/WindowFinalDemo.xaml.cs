@@ -26,6 +26,7 @@ namespace LeapMotionExploration.Windows.Samples
 
         private Controller Controller;
         private LeapListenerOneHandPosition Listener;
+        //A list of the shapes present on the canvas.
         private List<Shape> Shapes;
 
         public WindowFinalDemo()
@@ -50,36 +51,53 @@ namespace LeapMotionExploration.Windows.Samples
         {
             Application.Current.Dispatcher.Invoke(new Action(() =>
             {
-                double posX = cursorContainer.ActualWidth * position.x - leapCursor.Width / 2;
-                double posY = cursorContainer.ActualHeight * (1 - position.y) - leapCursor.Height / 2;
-                leapCursor.SetValue(Canvas.TopProperty, posY);
-                leapCursor.SetValue(Canvas.LeftProperty, posX);
+                double posX = cursorContainer.ActualWidth * position.x;
+                double posY = cursorContainer.ActualHeight * (1 - position.y);
+                leapCursor.SetValue(Canvas.TopProperty, posY - leapCursor.Height / 2);
+                leapCursor.SetValue(Canvas.LeftProperty, posX - leapCursor.Width / 2);
 
-                checkHover(posX, posY);
+                updateHover(posX, posY);
             }));
         }
 
-        private void checkHover(double posX, double posY)
+
+        private void updateHover(double posX, double posY)
         {
             foreach (Shape shape in Shapes)
             {
-                if (isShapeHover(shape, posX, posY))
+                if (isCursorOnShape(shape, posX, posY))
                 {
+                    //TODO hover only one shape
                     setShapeHover(shape);
-                    break;
+                }
+                else
+                {
+                    resetShapeHover(shape);
                 }
             }
         }
 
-        private void setShapeHover(Shape shape)
+        private void resetShapeHover(Shape shape)
         {
-            //TODO
+            Application.Current.Dispatcher.Invoke(new Action(() =>
+            {
+                shape.Opacity = 1;
+            }));
         }
 
-        private Boolean isShapeHover(Shape shape, double posX, double posY)
+        private void setShapeHover(Shape shape)
         {
-            //TODO
-            return false;
+            Application.Current.Dispatcher.Invoke(new Action(() =>
+            {
+                shape.Opacity = 0.5;
+            }));
+        }
+
+        private Boolean isCursorOnShape(Shape shape, double posX, double posY)
+        {
+            double shapeTop = (double)shape.GetValue(Canvas.TopProperty);
+            double shapeLeft = (double)shape.GetValue(Canvas.LeftProperty);
+            return (posX > shapeLeft && posX < (shapeLeft + shape.ActualWidth) && posY > shapeTop && posY < (shapeTop + shape.ActualHeight));            
         }
 
         protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
