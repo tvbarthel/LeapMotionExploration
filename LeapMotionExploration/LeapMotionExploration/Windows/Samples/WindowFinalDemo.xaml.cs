@@ -100,57 +100,45 @@ namespace LeapMotionExploration.Windows.Samples
 
         private void updateHover(double posX, double posY)
         {
-            if (_hoveredShape == null)
+            //reset the current hovered shape if needed
+            if (_hoveredShape!= null && !isCursorOnShape(_hoveredShape, posX, posY)) resetShapeHover();
+
+            //look for a new hovered shape
+            foreach (Shape shape in Shapes)
             {
-                //no shape hovered, check if cursor entered one
-                foreach (Shape shape in Shapes)
+                if (isCursorOnShape(shape, posX, posY))
                 {
-                    if (isCursorOnShape(shape, posX, posY))
-                    {
-                        //TODO hover only one shape
-                        setShapeHover(shape);
-                    }
+                    setShapeHover(shape);
                 }
-            }
-            else
+            }            
+        }
+
+        private void resetShapeHover()
+        {
+            if (_hoveredShape != null)
             {
-                //a shape is hovered, check if cursor left it
-                if (!isCursorOnShape(_hoveredShape, posX, posY))
+                Application.Current.Dispatcher.Invoke(new Action(() =>
                 {
-                    resetShapeHover(_hoveredShape);
-                }
-                else
-                {
-                    //check Zindex
-                    foreach (Shape shape in Shapes)
-                    {
-                        if (isCursorOnShape(shape, posX, posY) && Shapes.IndexOf(shape) > Shapes.IndexOf(_hoveredShape))
-                        {
-                            resetShapeHover(_hoveredShape);
-                            setShapeHover(shape);
-                        }
-                    }
-                }
+                    _hoveredShape.Opacity = 1;
+                    _hoveredShape.StrokeThickness = 0;
+                    _hoveredShape = null;
+                }));
             }
             
         }
 
-        private void resetShapeHover(Shape shape)
-        {
-            _hoveredShape = null;
-            Application.Current.Dispatcher.Invoke(new Action(() =>
-            {
-                shape.Opacity = 1;
-            }));
-        }
-
         private void setShapeHover(Shape shape)
         {
-            _hoveredShape = shape;
-            Application.Current.Dispatcher.Invoke(new Action(() =>
+            //if there is no _hoveredShape or if the shape has a higher index than _hoveredShape
+            if (_hoveredShape == null || (_hoveredShape != shape && Shapes.IndexOf(shape) > Shapes.IndexOf(_hoveredShape)))
             {
-                shape.Opacity = 0.5;
-            }));
+                resetShapeHover();
+                _hoveredShape = shape;
+                Application.Current.Dispatcher.Invoke(new Action(() =>
+                {
+                    _hoveredShape.Opacity = 0.5;
+                }));
+            }           
         }
 
         private Boolean isCursorOnShape(Shape shape, double posX, double posY)
