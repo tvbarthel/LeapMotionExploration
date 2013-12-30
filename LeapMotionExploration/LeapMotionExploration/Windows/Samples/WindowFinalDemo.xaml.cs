@@ -24,11 +24,11 @@ namespace LeapMotionExploration.Windows.Samples
     public partial class WindowFinalDemo : Window
     {
 
-        private Controller Controller;
+        private Controller _controller;
         //A list of the shapes present on the canvas.
-        private List<Shape> Shapes;
-        private LeapListenerOneHandPosition CursorListener;
-        private LeapListenerOneHandClose HandCloseListener;
+        private List<Shape> _shapes;
+        private LeapListenerOneHandPosition _cursorListener;
+        private LeapListenerOneHandClose _handCloseListener;
 
         private Shape _hoveredShape;
 
@@ -48,17 +48,17 @@ namespace LeapMotionExploration.Windows.Samples
             _originalShapePoint = new Point(0, 0);
             _startCursorPoint = new Point(0, 0);
 
-            Controller = new Controller();
+            _controller = new Controller();
 
-            CursorListener = new LeapListenerOneHandPosition(LeapUtils.LEFT_MOST_HAND);
-            Controller.AddListener(CursorListener);
-            CursorListener.OnStateChange += this.OnPositionChange;
+            _cursorListener = new LeapListenerOneHandPosition(LeapUtils.LEFT_MOST_HAND);
+            _controller.AddListener(_cursorListener);
+            _cursorListener.OnStateChange += this.OnPositionChange;
 
-            HandCloseListener = new LeapListenerOneHandClose(LeapUtils.LEFT_MOST_HAND);
-            Controller.AddListener(HandCloseListener);
-            HandCloseListener.OnHandStateChange += this.OnHandClosed;
+            _handCloseListener = new LeapListenerOneHandClose(LeapUtils.LEFT_MOST_HAND);
+            _controller.AddListener(_handCloseListener);
+            _handCloseListener.OnHandStateChange += this.OnHandClosed;
 
-            Shapes = new List<Shape>();
+            _shapes = new List<Shape>();
 
             Rectangle rect1 = new Rectangle();
             rect1.Height = rect1.Width = 32;
@@ -69,10 +69,10 @@ namespace LeapMotionExploration.Windows.Samples
             cursorContainer.Children.Add(rect1);
 
 
-            Shapes.Add(colorPicker);
-            Shapes.Add(shapePicker);
-            Shapes.Add(preview);
-            Shapes.Add(rect1);
+            _shapes.Add(colorPicker);
+            _shapes.Add(shapePicker);
+            _shapes.Add(preview);
+            _shapes.Add(rect1);
         }
 
         private void OnPositionChange(LeapEvent leapEvent)
@@ -110,7 +110,7 @@ namespace LeapMotionExploration.Windows.Samples
             if (_hoveredShape!= null && !isCursorOnShape(_hoveredShape, posX, posY)) resetShapeHover();
 
             //look for a new hovered shape
-            foreach (Shape shape in Shapes)
+            foreach (Shape shape in _shapes)
             {
                 if (isCursorOnShape(shape, posX, posY))
                 {
@@ -135,7 +135,7 @@ namespace LeapMotionExploration.Windows.Samples
         private void setShapeHover(Shape shape)
         {
             //if there is no _hoveredShape or if the shape has a higher index than _hoveredShape
-            if (_hoveredShape == null || (_hoveredShape != shape && Shapes.IndexOf(shape) > Shapes.IndexOf(_hoveredShape)))
+            if (_hoveredShape == null || (_hoveredShape != shape && _shapes.IndexOf(shape) > _shapes.IndexOf(_hoveredShape)))
             {
                 resetShapeHover();
                 _hoveredShape = shape;
@@ -155,8 +155,8 @@ namespace LeapMotionExploration.Windows.Samples
 
         protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
         {
-            Controller.RemoveListener(CursorListener);
-            Controller.Dispose();
+            _controller.RemoveListener(_cursorListener);
+            _controller.Dispose();
             base.OnClosing(e);
         }
 
@@ -246,7 +246,7 @@ namespace LeapMotionExploration.Windows.Samples
                 //TODO check drop area
                 if (isCursorOnShape(basket, _currentCursorPoint.X, _currentCursorPoint.Y))
                 {
-                    Shapes.Remove(_hoveredShape);
+                    _shapes.Remove(_hoveredShape);
                     cursorContainer.Children.Remove(_hoveredShape);
                 }
             }));
