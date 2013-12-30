@@ -61,7 +61,7 @@ namespace LeapMotionExploration.Windows.Samples
             Canvas.SetLeft(rect1, 100);
 
             cursorContainer.Children.Add(rect1);
-            
+
 
             Shapes.Add(colorPicker);
             Shapes.Add(shapePicker);
@@ -92,7 +92,7 @@ namespace LeapMotionExploration.Windows.Samples
                 {
                     updateHover(posX, posY);
                 }
-               
+
             }));
 
         }
@@ -118,6 +118,18 @@ namespace LeapMotionExploration.Windows.Samples
                 if (!isCursorOnShape(_hoveredShape, posX, posY))
                 {
                     resetShapeHover(_hoveredShape);
+                }
+                else
+                {
+                    //check Zindex
+                    foreach (Shape shape in Shapes)
+                    {
+                        if (isCursorOnShape(shape, posX, posY) && Shapes.IndexOf(shape) > Shapes.IndexOf(_hoveredShape))
+                        {
+                            resetShapeHover(_hoveredShape);
+                            setShapeHover(shape);
+                        }
+                    }
                 }
             }
             
@@ -169,7 +181,7 @@ namespace LeapMotionExploration.Windows.Samples
                     break;
                 case HandCloseEvent.CLOSE:
                     //TODO check the event position to know if an Ui element has been selected
-                    if (!_isDragging && _hoveredShape!=null)
+                    if (!_isDragging && _hoveredShape != null)
                     {
                         DragStarted();
                     }
@@ -224,7 +236,7 @@ namespace LeapMotionExploration.Windows.Samples
 
         private void DragFinished(bool cancelled)
         {
-            
+
             Application.Current.Dispatcher.Invoke(new Action(() =>
             {
                 //Inform drag stop
