@@ -147,10 +147,54 @@
                     </Binding>
                 </MultiBinding>
             </Canvas.Top>
-
-            <Ellipse x:Name="shapePickerOld" Width="100" Height="100" Stroke="#000000" StrokeThickness="2" Canvas.Left="20" />
-
+            
+            <Ellipse x:Name="shapePickerOld" Width="100" Height="100" Stroke="#000000" StrokeThickness="2" />            
         </Grid>
+
+        <!-- Shape Picker Rotating Menu -->
+        <Grid x:Name="mnShapePicker" Width="100" Panel.ZIndex="9000" Canvas.Left="150" RenderTransformOrigin="-1,0.5" Visibility="Hidden">
+            <Grid.RenderTransform>
+                <TransformGroup>
+                    <ScaleTransform/>
+                    <SkewTransform/>
+                    <RotateTransform Angle="0"/>
+                    <TranslateTransform/>
+                </TransformGroup>
+            </Grid.RenderTransform>
+            <Canvas.Top>
+                <MultiBinding Converter="{StaticResource leftMenuItemPositionConverter}">
+                    <Binding ElementName="cursorContainer" Path="ActualHeight"/>
+                    <Binding ElementName="mnShapePicker" Path="ActualHeight" />
+                    <Binding>
+                        <Binding.Source>
+                            <sys:Double>135</sys:Double>
+                        </Binding.Source>
+                    </Binding>
+                </MultiBinding>
+            </Canvas.Top>
+            <TextBlock x:Name="mnShapePickerRectangle" Text="Rectangle" TextAlignment="Center" Width="100" FontFamily="Roboto Lt" FontSize="16" Background="#d3d3d3" Padding="10" HorizontalAlignment="Center" VerticalAlignment="Center" RenderTransformOrigin="-0.8,0.5">
+                <TextBlock.RenderTransform>
+                    <TransformGroup>
+                        <ScaleTransform/>
+                        <SkewTransform/>
+                        <RotateTransform Angle="-90"/>
+                        <TranslateTransform/>
+                    </TransformGroup>
+                </TextBlock.RenderTransform>
+            </TextBlock>
+            <TextBlock x:Name="mnShapePickerCircle" Text="Circle" TextAlignment="Center" Width="100" FontFamily="Roboto Lt" FontSize="16" Background="#d3d3d3" Padding="10" HorizontalAlignment="Center" VerticalAlignment="Center" RenderTransformOrigin="-0.8,0.5">
+                <TextBlock.RenderTransform>
+                    <TransformGroup>
+                        <ScaleTransform/>
+                        <SkewTransform/>
+                        <RotateTransform Angle="-45"/>
+                        <TranslateTransform/>
+                    </TransformGroup>
+                </TextBlock.RenderTransform>
+            </TextBlock>
+            <TextBlock x:Name="mnShapePickerEllipse" Text="Ellipse" TextAlignment="Center" Width="100" FontFamily="Roboto Lt" FontSize="16" Background="#d3d3d3" Padding="10" HorizontalAlignment="Center" VerticalAlignment="Center" RenderTransformOrigin="-0.8,0.5"/>
+        </Grid>
+
 
         <Rectangle Name="basket" Stroke="Black" StrokeThickness="2" Height="150" Width="150" Canvas.Top="100" Canvas.Left="500" Fill="#33000000" ClipToBounds="True"/>
         
