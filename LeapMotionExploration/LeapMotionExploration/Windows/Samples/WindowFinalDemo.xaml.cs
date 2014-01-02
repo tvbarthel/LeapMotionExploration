@@ -18,6 +18,7 @@ using MyLeap.Event;
 using LeapMotionExploration.Windows.Samples.Converter;
 using LeapMotionExploration.Windows.Samples.Ui;
 using System.Windows.Media.Effects;
+using System.Windows.Media.Animation;
 
 namespace LeapMotionExploration.Windows.Samples
 {
@@ -52,6 +53,7 @@ namespace LeapMotionExploration.Windows.Samples
         private bool _isDragging;
         private Point _originalGraphicElementPoint;
         private Point _startCursorPoint;
+        private int _realZIndex;
 
         //Rotating selection
         private LeapListenerRotateSelection _rotatingSelectionListener;
@@ -524,6 +526,42 @@ namespace LeapMotionExploration.Windows.Samples
             }
         }
 
+        private void Zoom(FrameworkElement target, DoubleAnimation animation)
+        {
+            ScaleTransform trans = new ScaleTransform();
+            target.RenderTransform = trans;
+            // if you use the same animation for X & Y you don't need anim1, anim2 
+            DoubleAnimation anim = animation;
+            trans.BeginAnimation(ScaleTransform.ScaleXProperty, anim);
+            trans.BeginAnimation(ScaleTransform.ScaleYProperty, anim);
+
+        }
+
+        private void SetDraggingOverlay()
+        {
+            resetDraggableOverlay();
+            Zoom(_hoveredGraphicElement, new DoubleAnimation(1, 1.2, TimeSpan.FromMilliseconds(100)));
+            _hoveredGraphicElement.Effect = new DropShadowEffect
+            {
+                Color = Colors.Black,
+                Direction = 320,
+                ShadowDepth = 7,
+                Opacity = 0.8,
+                BlurRadius = 4
+            };
+            _realZIndex = Canvas.GetZIndex(_hoveredGraphicElement);
+            Canvas.SetZIndex(_hoveredGraphicElement, 99);
+        }
+
+        private void UnsetDragginOverlay()
+        {
+            _hoveredGraphicElement.Effect = null;
+            DoubleAnimation anim = new DoubleAnimation(1.2, 1, TimeSpan.FromMilliseconds(100));
+            Zoom(_hoveredGraphicElement, anim);
+            setDraggableOverlay(_hoveredGraphicElement);
+            Canvas.SetZIndex(_hoveredGraphicElement, _realZIndex);
+        }
+
         private void DragStarted()
         {
 
@@ -545,15 +583,7 @@ namespace LeapMotionExploration.Windows.Samples
 
                 //ui
                 leapCursor.Fill = new SolidColorBrush(Color.FromArgb(255, 255, 255, 0));
-                resetDraggableOverlay();
-                _hoveredGraphicElement.Effect = new DropShadowEffect
-                {
-                    Color = Colors.Black,
-                    Direction = 320,
-                    ShadowDepth = 7,
-                    Opacity = 0.8,
-                    BlurRadius = 4
-                };
+                SetDraggingOverlay();
 
             }));
 
@@ -593,8 +623,7 @@ namespace LeapMotionExploration.Windows.Samples
 
                 //ui
                 leapCursor.Fill = new SolidColorBrush(Color.FromArgb(0, 0, 0, 0));
-                _hoveredGraphicElement.Effect = null;
-                setDraggableOverlay(_hoveredGraphicElement);
+                UnsetDragginOverlay();
 
                 //TODO check drop area
                 if (isCursorOnGraphicElement(basket, _currentCursorPoint.X, _currentCursorPoint.Y))
