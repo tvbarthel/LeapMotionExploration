@@ -48,6 +48,9 @@ namespace LeapMotionExploration.Windows.Samples
         private Point _startCursorPoint;
         private int _realZIndex;
 
+        //basket
+        private DeleteAdorner _deleteAdorner;
+
         //Rotating selection
         private LeapListenerRotateSelection _rotatingSelectionListener;
 
@@ -236,7 +239,7 @@ namespace LeapMotionExploration.Windows.Samples
 
         private void selectNextColor()
         {
-            _currentColorPickerItemIndex = Math.Min(_mnColorPickerItems.Count(), _currentColorPickerItemIndex + 1);
+            _currentColorPickerItemIndex = Math.Min(_mnColorPickerItems.Count()-1, _currentColorPickerItemIndex + 1);
             updateCurrentColorSelection();
         }
 
@@ -303,7 +306,7 @@ namespace LeapMotionExploration.Windows.Samples
         }
 
         private void selectNextShape() {
-            _currentShapePickerItemIndex = Math.Min(_mnShapePickerItems.Count(), _currentShapePickerItemIndex + 1);
+            _currentShapePickerItemIndex = Math.Min(_mnShapePickerItems.Count()-1, _currentShapePickerItemIndex + 1);
             updateCurrentShapeSelection();
         }
 
@@ -374,27 +377,12 @@ namespace LeapMotionExploration.Windows.Samples
                 {
                     _hoveredGraphicElement.Opacity = 1;
                     _hoveredGraphicElement = null;
-                    resetDraggableOverlay();
+                    UnsetDraggableOverlay();
                 }));
             }
             
         }
 
-        private void setDraggableOverlay(FrameworkElement graphicElement)
-        {
-            _draggableHoveredAdorner = new DraggableHoveredAdorner(graphicElement);
-            AdornerLayer layer = AdornerLayer.GetAdornerLayer(graphicElement);
-            layer.Add(_draggableHoveredAdorner);
-        }
-
-        private void resetDraggableOverlay(){
-            if (_draggableHoveredAdorner != null)
-            {
-                AdornerLayer.GetAdornerLayer(_draggableHoveredAdorner.AdornedElement).Remove(_draggableHoveredAdorner);
-                _draggableHoveredAdorner = null;
-
-            }
-        }
 
         private void setHoveredGraphicElement(FrameworkElement graphicElement)
         {
@@ -407,7 +395,7 @@ namespace LeapMotionExploration.Windows.Samples
                 {
                     if (!_staticGraphicElements.Contains(graphicElement))
                     {
-                        setDraggableOverlay(graphicElement);
+                        SetDraggableOverlay(graphicElement);
                        
                     }
                     else
@@ -454,41 +442,10 @@ namespace LeapMotionExploration.Windows.Samples
             }
         }
 
-        private void Zoom(FrameworkElement target, DoubleAnimation animation)
-        {
-            ScaleTransform trans = new ScaleTransform();
-            target.RenderTransform = trans;
-            // if you use the same animation for X & Y you don't need anim1, anim2 
-            DoubleAnimation anim = animation;
-            trans.BeginAnimation(ScaleTransform.ScaleXProperty, anim);
-            trans.BeginAnimation(ScaleTransform.ScaleYProperty, anim);
 
-        }
-
-        private void SetDraggingOverlay()
-        {
-            resetDraggableOverlay();
-            Zoom(_hoveredGraphicElement, new DoubleAnimation(1, 1.2, TimeSpan.FromMilliseconds(100)));
-            _hoveredGraphicElement.Effect = new DropShadowEffect
-            {
-                Color = Colors.Black,
-                Direction = 320,
-                ShadowDepth = 7,
-                Opacity = 0.8,
-                BlurRadius = 4
-            };
-            _realZIndex = Canvas.GetZIndex(_hoveredGraphicElement);
-            Canvas.SetZIndex(_hoveredGraphicElement, 99);
-        }
-
-        private void UnsetDragginOverlay()
-        {
-            _hoveredGraphicElement.Effect = null;
-            DoubleAnimation anim = new DoubleAnimation(1.2, 1, TimeSpan.FromMilliseconds(100));
-            Zoom(_hoveredGraphicElement, anim);
-            setDraggableOverlay(_hoveredGraphicElement);
-            Canvas.SetZIndex(_hoveredGraphicElement, _realZIndex);
-        }
+        /**
+         * Drag gestures
+         */
 
         private void DragStarted()
         {
@@ -530,6 +487,15 @@ namespace LeapMotionExploration.Windows.Samples
                 //Calculate the offset
                 Point offset = new Point(_startCursorPoint.X - current.X, _startCursorPoint.Y - current.Y);
 
+                //check basket area
+                if (isCursorOnGraphicElement(basket, _currentCursorPoint.X, _currentCursorPoint.Y))
+                {
+                    SetDeleteOverlay();
+                }
+                else
+                {
+                    UnsetDeleteOverlay();
+                }
 
                 //Update the element position
                 Canvas.SetTop(_hoveredGraphicElement, _originalGraphicElementPoint.Y - offset.Y);
@@ -556,11 +522,106 @@ namespace LeapMotionExploration.Windows.Samples
                 //TODO check drop area
                 if (isCursorOnGraphicElement(basket, _currentCursorPoint.X, _currentCursorPoint.Y))
                 {
+                    UnsetDraggableOverlay();
+                    UnsetDeleteOverlay();
                     _graphicElements.Remove(_hoveredGraphicElement);
                     cursorContainer.Children.Remove(_hoveredGraphicElement);
                     _hoveredGraphicElement = null;
+
                 }
             }));
+        }
+
+        /**
+         * 
+         * Overlay 
+         * 
+         */
+
+        
+        //Drag
+        private void SetDraggingOverlay()
+        {
+            UnsetDraggableOverlay();
+            Zoom(_hoveredGraphicElement, new DoubleAnimation(1, 1.2, TimeSpan.FromMilliseconds(100)));
+            _hoveredGraphicElement.Effect = new DropShadowEffect
+            {
+                Color = Colors.Black,
+                Direction = 320,
+                ShadowDepth = 7,
+                Opacity = 0.8,
+                BlurRadius = 4
+            };
+            _realZIndex = Canvas.GetZIndex(_hoveredGraphicElement);
+            Canvas.SetZIndex(_hoveredGraphicElement, 99);
+        }
+
+        private void UnsetDragginOverlay()
+        {
+            _hoveredGraphicElement.Effect = null;
+            DoubleAnimation anim = new DoubleAnimation(1.2, 1, TimeSpan.FromMilliseconds(100));
+            Zoom(_hoveredGraphicElement, anim);
+            SetDraggableOverlay(_hoveredGraphicElement);
+            Canvas.SetZIndex(_hoveredGraphicElement, _realZIndex);
+        }
+
+
+
+
+        //Draggable
+        private void SetDraggableOverlay(FrameworkElement graphicElement)
+        {
+            _draggableHoveredAdorner = new DraggableHoveredAdorner(graphicElement);
+            AdornerLayer layer = AdornerLayer.GetAdornerLayer(graphicElement);
+            layer.Add(_draggableHoveredAdorner);
+        }
+
+        private void UnsetDraggableOverlay()
+        {
+            if (_draggableHoveredAdorner != null)
+            {
+                AdornerLayer.GetAdornerLayer(_draggableHoveredAdorner.AdornedElement).Remove(_draggableHoveredAdorner);
+                _draggableHoveredAdorner = null;
+
+            }
+        }
+
+
+
+
+        //Deletable
+        private void SetDeleteOverlay()
+        {
+            if (_deleteAdorner == null)
+            {
+                _deleteAdorner = new DeleteAdorner(_hoveredGraphicElement);
+                AdornerLayer layer = AdornerLayer.GetAdornerLayer(_hoveredGraphicElement);
+                layer.Add(_deleteAdorner);
+                _hoveredGraphicElement.Opacity = 0.8;
+            }
+        }
+
+        private void UnsetDeleteOverlay()
+        {
+            if (_deleteAdorner != null)
+            {
+                AdornerLayer.GetAdornerLayer(_deleteAdorner.AdornedElement).Remove(_deleteAdorner);
+                _deleteAdorner = null;
+                _hoveredGraphicElement.Opacity = 1.0;
+
+            }
+        }
+
+        private void Zoom(FrameworkElement target, DoubleAnimation animation)
+        {
+            ScaleTransform trans = new ScaleTransform();
+            target.RenderTransformOrigin = new Point(0.5, 0.5);
+            target.RenderTransform = trans;
+            // if you use the same animation for X & Y you don't need anim1, anim2 
+            DoubleAnimation anim = animation;
+            trans.BeginAnimation(ScaleTransform.ScaleXProperty, anim);
+            trans.BeginAnimation(ScaleTransform.ScaleYProperty, anim);
+
         }
 
     }
