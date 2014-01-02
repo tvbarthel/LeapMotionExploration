@@ -141,7 +141,7 @@ namespace LeapMotionExploration.Windows.Samples
 
         private void rotationSelectionEvent(LeapEvent leapEvent)
         {
-            if (_hoveredShape.Equals(colorPicker))
+            if (_hoveredShape != null && _hoveredShape.Equals(colorPicker))
             {
                 colorSelectionEvent(leapEvent);
             }
