@@ -27,6 +27,8 @@ namespace LeapMotionExploration.Windows.Samples
         private Controller _controller;
         //A list of the shapes present on the canvas.
         private List<Shape> _shapes;
+        //A list of the shapes that the user can not drag.
+        private List<Shape> _staticShapes;
         private LeapListenerOneHandPosition _cursorListener;
         private LeapListenerOneHandClose _handCloseListener;
 
@@ -59,6 +61,7 @@ namespace LeapMotionExploration.Windows.Samples
             _handCloseListener.OnHandStateChange += this.OnHandClosed;
 
             _shapes = new List<Shape>();
+            _staticShapes = new List<Shape>();
 
             Rectangle rect1 = new Rectangle();
             rect1.Height = rect1.Width = 32;
@@ -73,6 +76,9 @@ namespace LeapMotionExploration.Windows.Samples
             _shapes.Add(shapePicker);
             _shapes.Add(preview);
             _shapes.Add(rect1);
+
+            _staticShapes.Add(colorPicker);
+            _staticShapes.Add(shapePicker);
         }
 
         private void OnPositionChange(LeapEvent leapEvent)
@@ -174,7 +180,7 @@ namespace LeapMotionExploration.Windows.Samples
                     break;
                 case HandCloseEvent.CLOSE:
                     //TODO check the event position to know if an Ui element has been selected
-                    if (!_isDragging && _hoveredShape != null)
+                    if (!_isDragging && _hoveredShape != null && !_staticShapes.Contains(_hoveredShape))
                     {
                         DragStarted();
                     }
