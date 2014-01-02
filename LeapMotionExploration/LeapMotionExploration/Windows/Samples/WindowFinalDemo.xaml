@@ -103,23 +103,7 @@
                 </TextBlock.RenderTransform>
             </TextBlock>
         </Grid>
-        
-        <!-- Preview -->
-        <Ellipse x:Name="preview" Width="100" Height="100" Fill="#AA66CC" Canvas.Left="75" >
-            <Canvas.Top>
-                <MultiBinding Converter="{StaticResource leftMenuItemPositionConverter}">
-                    <Binding ElementName="cursorContainer" Path="ActualHeight"/>
-                    <Binding ElementName="preview" Path="ActualHeight" />
-                    <Binding>
-                        <Binding.Source>
-                            <sys:Double>0</sys:Double>
-                        </Binding.Source>
-                    </Binding>
-                </MultiBinding>
-            </Canvas.Top>
-        </Ellipse>
-
-
+       
         <!-- Shape Picker Item -->
         <Rectangle x:Name="shapePickerBackground" Width="120" Height="120" Fill="#d3d3d3" Canvas.Left="10" >
             <Canvas.Top>
@@ -198,6 +182,6 @@
         <Rectangle Name="basket" Stroke="Black" StrokeThickness="2" Height="150" Width="150" Canvas.Top="100" Canvas.Left="500" Fill="#33000000" ClipToBounds="True"/>
         
         <!-- Leap Cursor-->
-        <Ellipse x:Name="leapCursor" Stroke="Black" StrokeThickness="2" Height="15" Width="15" Fill="#33000000" ClipToBounds="True"/>
+        <Ellipse x:Name="leapCursor" Panel.ZIndex="999999" Stroke="Black" StrokeThickness="2" Height="15" Width="15" Fill="#33000000" ClipToBounds="True"/>
     </Canvas>
 </Window>

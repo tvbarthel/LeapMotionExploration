@@ -15,6 +15,7 @@ using Leap;
 using MyLeap.Listener;
 using MyLeap.Utils;
 using MyLeap.Event;
+using LeapMotionExploration.Windows.Samples.Converter;
 using LeapMotionExploration.Windows.Samples.Ui;
 using System.Windows.Media.Effects;
 
@@ -26,6 +27,12 @@ namespace LeapMotionExploration.Windows.Samples
     public partial class WindowFinalDemo : Window
     {
 
+        private const int MIN_WIDTH = 75;
+        private const int MIN_HEIGHT = 75;
+
+        private const int DEFAULT_HEIGHT = 150;
+        private const int DEFAULT_WIDTH = 150;        
+        
         private Controller _controller;
         //A list of the graphic elements present on the canvas.
         private List<FrameworkElement> _graphicElements;
@@ -56,6 +63,8 @@ namespace LeapMotionExploration.Windows.Samples
         //Shape rotation selection
         private TextBlock[] _mnShapePickerItems;
         private int _currentShapePickerItemIndex;
+
+        private Shape _currentCandidateShape;
 
         private Point _currentCursorPoint;
 
@@ -105,11 +114,12 @@ namespace LeapMotionExploration.Windows.Samples
 
             _graphicElements.Add(colorPicker);
             _graphicElements.Add(shapePicker);
-            _graphicElements.Add(preview);
             _graphicElements.Add(rect1);
 
             _staticGraphicElements.Add(colorPicker);
             _staticGraphicElements.Add(shapePicker);
+
+            createCandidateShape();
         }
 
         private void OnPositionChange(LeapEvent leapEvent)
@@ -140,6 +150,68 @@ namespace LeapMotionExploration.Windows.Samples
                 }
 
             }));
+
+        }
+
+        private void createCandidateShape()
+        {
+
+            if (_currentCandidateShape != null)
+            {
+                cursorContainer.Children.Remove(_currentCandidateShape);
+                _currentCandidateShape = null;
+            }
+
+            switch(_currentShapePickerItemIndex)
+            {
+                case 0:
+                    //Rectangle
+                    _currentCandidateShape = new Rectangle();
+                    _currentCandidateShape.Width = DEFAULT_WIDTH;
+                    _currentCandidateShape.Height = DEFAULT_HEIGHT;
+                    break;
+
+                case 1:
+                    //Circle
+                    _currentCandidateShape = new Ellipse();
+                    _currentCandidateShape.Width = DEFAULT_WIDTH;
+                    _currentCandidateShape.Height = DEFAULT_HEIGHT;
+                    break;
+
+                case 2:
+                    //Ellipse
+                    _currentCandidateShape = new Ellipse();
+                    _currentCandidateShape.Width = DEFAULT_WIDTH;
+                    _currentCandidateShape.Height = Math.Max(DEFAULT_HEIGHT / 2, MIN_HEIGHT);
+                    break;
+            }
+
+            if (_currentCandidateShape != null)
+            {
+                _currentCandidateShape.Fill = _mnColorPickerItems[_currentColorPickerItemIndex].Background;
+
+                MultiBinding mbCanvasTop = new MultiBinding();
+                mbCanvasTop.Converter = new LeftMenuItemCanvasTopConverter();
+
+                Binding containerHeight = new Binding("ActualHeight");
+                containerHeight.ElementName = cursorContainer.Name;
+
+                Binding selfHeight = new Binding("ActualHeight");
+                selfHeight.RelativeSource = RelativeSource.Self;
+
+                Binding marginTop = new Binding();
+                marginTop.Source = 0d;
+
+                mbCanvasTop.Bindings.Add(containerHeight);
+                mbCanvasTop.Bindings.Add(selfHeight);
+                mbCanvasTop.Bindings.Add(marginTop);
+
+                _currentCandidateShape.SetBinding(Canvas.TopProperty, mbCanvasTop);
+                _currentCandidateShape.SetValue(Canvas.LeftProperty, 100d);
+
+                cursorContainer.Children.Add(_currentCandidateShape);
+                _graphicElements.Add(_currentCandidateShape);
+            }
 
         }
 
