@@ -209,7 +209,7 @@ namespace LeapMotionExploration.Windows.Samples
                 mbCanvasTop.Bindings.Add(marginTop);
 
                 _currentCandidateShape.SetBinding(Canvas.TopProperty, mbCanvasTop);
-                _currentCandidateShape.SetValue(Canvas.LeftProperty, 100d);
+                _currentCandidateShape.SetValue(Canvas.LeftProperty, 180d);
 
                 cursorContainer.Children.Add(_currentCandidateShape);
                 _graphicElements.Add(_currentCandidateShape);

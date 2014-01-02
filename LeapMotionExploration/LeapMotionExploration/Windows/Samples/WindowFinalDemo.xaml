@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:localConverter="clr-namespace:LeapMotionExploration.Windows.Samples.Converter"
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
-        Title="WindowDemo" Height="500" Width="800">
+        Title="WindowDemo" Height="800" Width="1000">
     <Canvas x:Name="cursorContainer" Background="#f9f9f9">
         <Canvas.Resources>
             <localConverter:LeftMenuItemCanvasTopConverter x:Key="leftMenuItemPositionConverter" />
@@ -12,7 +12,7 @@
         <!-- Left Menu -->
         
         <!-- Color Picker Item -->
-        <Rectangle x:Name="colorPickerBackground" Width="120" Height="120" Fill="#d3d3d3" Canvas.Left="10" >
+        <Rectangle x:Name="colorPickerBackground" Width="120" Height="120" Fill="#d3d3d3" Canvas.Left="40" >
             <Canvas.Top>
                 <MultiBinding Converter="{StaticResource leftMenuItemPositionConverter}">
                     <Binding ElementName="cursorContainer" Path="ActualHeight"/>
@@ -26,7 +26,7 @@
             </Canvas.Top>
         </Rectangle>
 
-        <Rectangle x:Name="colorPicker" Width="100" Height="100" Fill="#AA66CC" Canvas.Left="20">
+        <Rectangle x:Name="colorPicker" Width="100" Height="100" Fill="#AA66CC" Canvas.Left="50">
             <Canvas.Top>
                 <MultiBinding Converter="{StaticResource leftMenuItemPositionConverter}">
                     <Binding ElementName="cursorContainer" Path="ActualHeight"/>
@@ -41,7 +41,7 @@
         </Rectangle>
         
         <!-- Color Picker Rotating Menu -->
-        <Grid x:Name="mnColorPicker" Width="80" Panel.ZIndex="9000" Canvas.Left="150" RenderTransformOrigin="-1,0.5" Visibility="Hidden">
+        <Grid x:Name="mnColorPicker" Width="80" Panel.ZIndex="9000" Canvas.Left="200" RenderTransformOrigin="-1,0.5" Visibility="Hidden">
             <Grid.RenderTransform>
                 <TransformGroup>
                     <ScaleTransform/>
@@ -105,28 +105,28 @@
         </Grid>
        
         <!-- Shape Picker Item -->
-        <Rectangle x:Name="shapePickerBackground" Width="120" Height="120" Fill="#d3d3d3" Canvas.Left="10" >
+        <Rectangle x:Name="shapePickerBackground" Width="120" Height="120" Fill="#d3d3d3" Canvas.Left="40" >
             <Canvas.Top>
                 <MultiBinding Converter="{StaticResource leftMenuItemPositionConverter}">
                     <Binding ElementName="cursorContainer" Path="ActualHeight"/>
                     <Binding ElementName="shapePickerBackground" Path="ActualHeight" />
                     <Binding>
                         <Binding.Source>
-                            <sys:Double>135</sys:Double>
+                            <sys:Double>115</sys:Double>
                         </Binding.Source>
                     </Binding>
                 </MultiBinding>
             </Canvas.Top>
         </Rectangle>
 
-        <Grid x:Name="shapePicker" Width="100" Height="100" Canvas.Left="20" >
+        <Grid x:Name="shapePicker" Width="100" Height="100" Canvas.Left="50" >
             <Canvas.Top>
                 <MultiBinding Converter="{StaticResource leftMenuItemPositionConverter}">
                     <Binding ElementName="cursorContainer" Path="ActualHeight"/>
                     <Binding ElementName="shapePicker" Path="ActualHeight" />
                     <Binding>
                         <Binding.Source>
-                            <sys:Double>135</sys:Double>
+                            <sys:Double>115</sys:Double>
                         </Binding.Source>
                     </Binding>
                 </MultiBinding>
@@ -135,7 +135,7 @@
         </Grid>
 
         <!-- Shape Picker Rotating Menu -->
-        <Grid x:Name="mnShapePicker" Width="100" Panel.ZIndex="9000" Canvas.Left="150" RenderTransformOrigin="-1,0.5" Visibility="Hidden">
+        <Grid x:Name="mnShapePicker" Width="100" Panel.ZIndex="9000" Canvas.Left="200" RenderTransformOrigin="-1,0.5" Visibility="Hidden">
             <Grid.RenderTransform>
                 <TransformGroup>
                     <ScaleTransform/>
@@ -150,7 +150,7 @@
                     <Binding ElementName="mnShapePicker" Path="ActualHeight" />
                     <Binding>
                         <Binding.Source>
-                            <sys:Double>135</sys:Double>
+                            <sys:Double>115</sys:Double>
                         </Binding.Source>
                     </Binding>
                 </MultiBinding>
