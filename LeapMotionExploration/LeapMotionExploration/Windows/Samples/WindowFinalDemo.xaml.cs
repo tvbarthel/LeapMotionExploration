@@ -25,11 +25,16 @@ namespace LeapMotionExploration.Windows.Samples
     public partial class WindowFinalDemo : Window
     {
 
-        private Controller Controller;
+        private Controller _controller;
         //A list of the shapes present on the canvas.
-        private List<Shape> Shapes;
-        private LeapListenerOneHandPosition CursorListener;
-        private LeapListenerOneHandClose HandCloseListener;
+        private List<Shape> _shapes;
+        //A list of the shapes that the user can not drag.
+        private List<Shape> _staticShapes;
+
+        //Cursor position
+        private LeapListenerOneHandPosition _cursorListener;
+        private Boolean _isCursorPositionTracked;
+        private LeapListenerOneHandClose _handCloseListener;
 
         //hovered
         private Shape _hoveredShape;
@@ -39,6 +44,11 @@ namespace LeapMotionExploration.Windows.Samples
         private bool _isDragging;
         private Point _originalShapePoint;
         private Point _startCursorPoint;
+
+        //Color rotating selection
+        private TextBlock[] _mnColorPickerItems;
+        private int _currentColorPickerItemIndex;
+        private LeapListenerRotateSelection _rotatingSelectionListener;
 
         private Point _currentCursorPoint;
 
@@ -51,17 +61,27 @@ namespace LeapMotionExploration.Windows.Samples
             _originalShapePoint = new Point(0, 0);
             _startCursorPoint = new Point(0, 0);
 
-            Controller = new Controller();
+            _controller = new Controller();
 
-            CursorListener = new LeapListenerOneHandPosition(LeapUtils.LEFT_MOST_HAND);
-            Controller.AddListener(CursorListener);
-            CursorListener.OnStateChange += this.OnPositionChange;
+            _cursorListener = new LeapListenerOneHandPosition(LeapUtils.LEFT_MOST_HAND);
+            _isCursorPositionTracked = true;
+            _controller.AddListener(_cursorListener);
+            _cursorListener.OnStateChange += this.OnPositionChange;
 
-            HandCloseListener = new LeapListenerOneHandClose(LeapUtils.LEFT_MOST_HAND);
-            Controller.AddListener(HandCloseListener);
-            HandCloseListener.OnHandStateChange += this.OnHandClosed;
+            _handCloseListener = new LeapListenerOneHandClose(LeapUtils.LEFT_MOST_HAND);
+            _controller.AddListener(_handCloseListener);
+            _handCloseListener.OnHandStateChange += this.OnHandClosed;
 
-            Shapes = new List<Shape>();
+            _rotatingSelectionListener = new LeapListenerRotateSelection();
+            _controller.AddListener(_rotatingSelectionListener);
+            _rotatingSelectionListener.OnStateChange += rotationSelectionEvent;
+
+            _mnColorPickerItems = new TextBlock[] { mnColorPickerBlue, mnColorPickerPurple, mnColorPickerGreen, mnColorPickerOrange, mnColorPickerRed };
+            _currentColorPickerItemIndex = 0;
+            selectColorItem(_currentColorPickerItemIndex);
+
+            _shapes = new List<Shape>();
+            _staticShapes = new List<Shape>();
 
             Rectangle rect1 = new Rectangle();
             rect1.Height = rect1.Width = 32;
@@ -72,10 +92,13 @@ namespace LeapMotionExploration.Windows.Samples
             cursorContainer.Children.Add(rect1);
 
 
-            Shapes.Add(colorPicker);
-            Shapes.Add(shapePicker);
-            Shapes.Add(preview);
-            Shapes.Add(rect1);
+            _shapes.Add(colorPicker);
+            _shapes.Add(shapePicker);
+            _shapes.Add(preview);
+            _shapes.Add(rect1);
+
+            _staticShapes.Add(colorPicker);
+            _staticShapes.Add(shapePicker);
         }
 
         private void OnPositionChange(LeapEvent leapEvent)
@@ -88,10 +111,13 @@ namespace LeapMotionExploration.Windows.Samples
 
             Application.Current.Dispatcher.Invoke(new Action(() =>
             {
-                _currentCursorPoint.X = cursorContainer.ActualWidth * position.x;
-                _currentCursorPoint.Y = cursorContainer.ActualHeight * (1 - position.y);
-                leapCursor.SetValue(Canvas.TopProperty, _currentCursorPoint.Y - leapCursor.Height / 2);
-                leapCursor.SetValue(Canvas.LeftProperty, _currentCursorPoint.X - leapCursor.Width / 2);
+                if (_isCursorPositionTracked)
+                {
+                    _currentCursorPoint.X = cursorContainer.ActualWidth * position.x;
+                    _currentCursorPoint.Y = cursorContainer.ActualHeight * (1 - position.y);
+                    leapCursor.SetValue(Canvas.TopProperty, _currentCursorPoint.Y - leapCursor.Height / 2);
+                    leapCursor.SetValue(Canvas.LeftProperty, _currentCursorPoint.X - leapCursor.Width / 2);
+                }
 
                 if (_isDragging)
                 {
@@ -106,6 +132,99 @@ namespace LeapMotionExploration.Windows.Samples
 
         }
 
+        /**
+         * Rotation Selection
+         * 
+         * rotationSelectionEvent(LeapEvent leapEvent)
+         * colorSelectionEvent(LeapEvent leapEvent)
+         */
+
+        private void rotationSelectionEvent(LeapEvent leapEvent)
+        {
+            if (_hoveredShape.Equals(colorPicker))
+            {
+                colorSelectionEvent(leapEvent);
+            }
+        }
+
+        private void colorSelectionEvent(LeapEvent leapEvent)
+        {
+            switch (leapEvent.Type)
+            {
+                case LeapEvent.ROTATION_SELECTION_START:
+                    _isCursorPositionTracked = false;
+                    setColorMenuVisibility(Visibility.Visible);
+                    break;
+
+                case LeapEvent.ROTATION_SELECTION_NEXT:
+                    selectNextColor();
+                    break;
+
+                case LeapEvent.ROTATION_SELECTION_PREVIOUS:
+                    selectPreviousColor();
+                    break;
+
+                case LeapEvent.ROTATION_SELECTION_END:
+                    _isCursorPositionTracked = true;
+                    setColorMenuVisibility(Visibility.Hidden);
+                    break;
+            }
+        }   
+
+
+        /**
+         * Color Rotating Picker
+         * 
+         * selectColorItem(int i)
+         * selectNextColor()
+         * selectPreviousColor()
+         * updateCurrentColorSelection()
+         * setColorMenuVisibility(Visibility visibility)
+         */
+
+        private void selectColorItem(int i)
+        {
+            mnColorPicker.RenderTransform = new RotateTransform(90 - 45 * i);
+            foreach (TextBlock textBlock in _mnColorPickerItems)
+            {
+                textBlock.Opacity = 0.4;
+            }
+            _mnColorPickerItems[i].Opacity = 1;
+            colorPicker.Fill = _mnColorPickerItems[i].Background;
+        }
+
+        private void selectNextColor()
+        {
+            _currentColorPickerItemIndex = Math.Min(_mnColorPickerItems.Count(), _currentColorPickerItemIndex + 1);
+            updateCurrentColorSelection();
+        }
+
+        private void selectPreviousColor()
+        {
+            _currentColorPickerItemIndex = Math.Max(0, _currentColorPickerItemIndex - 1);
+            updateCurrentColorSelection();
+        }
+
+        private void updateCurrentColorSelection()
+        {
+            Application.Current.Dispatcher.Invoke(new Action(() =>
+            {
+                selectColorItem(_currentColorPickerItemIndex);
+            }));
+        }
+
+        private void setColorMenuVisibility(Visibility visibility)
+        {
+            Application.Current.Dispatcher.Invoke(new Action(() =>
+            {
+                mnColorPicker.Visibility = visibility;
+            }));
+        }
+
+
+        /**
+         * Hover & Drag
+         */
 
         private void updateHover(double posX, double posY)
         {
@@ -113,7 +232,7 @@ namespace LeapMotionExploration.Windows.Samples
             if (_hoveredShape!= null && !isCursorOnShape(_hoveredShape, posX, posY)) resetShapeHover();
 
             //look for a new hovered shape
-            foreach (Shape shape in Shapes)
+            foreach (Shape shape in _shapes)
             {
                 if (isCursorOnShape(shape, posX, posY))
                 {
@@ -140,7 +259,7 @@ namespace LeapMotionExploration.Windows.Samples
         private void setShapeHover(Shape shape)
         {
             //if there is no _hoveredShape or if the shape has a higher index than _hoveredShape
-            if (_hoveredShape == null || (_hoveredShape != shape && Shapes.IndexOf(shape) > Shapes.IndexOf(_hoveredShape)))
+            if (_hoveredShape == null || (_hoveredShape != shape && _shapes.IndexOf(shape) > _shapes.IndexOf(_hoveredShape)))
             {
                 resetShapeHover();
                 _hoveredShape = shape;
@@ -163,8 +282,8 @@ namespace LeapMotionExploration.Windows.Samples
 
         protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
         {
-            Controller.RemoveListener(CursorListener);
-            Controller.Dispose();
+            _controller.RemoveListener(_cursorListener);
+            _controller.Dispose();
             base.OnClosing(e);
         }
 
@@ -182,7 +301,7 @@ namespace LeapMotionExploration.Windows.Samples
                     break;
                 case HandCloseEvent.CLOSE:
                     //TODO check the event position to know if an Ui element has been selected
-                    if (!_isDragging && _hoveredShape != null)
+                    if (!_isDragging && _hoveredShape != null && !_staticShapes.Contains(_hoveredShape))
                     {
                         DragStarted();
                     }
@@ -254,7 +373,7 @@ namespace LeapMotionExploration.Windows.Samples
                 //TODO check drop area
                 if (isCursorOnShape(basket, _currentCursorPoint.X, _currentCursorPoint.Y))
                 {
-                    Shapes.Remove(_hoveredShape);
+                    _shapes.Remove(_hoveredShape);
                     cursorContainer.Children.Remove(_hoveredShape);
                     _hoveredShape = null;
                 }
