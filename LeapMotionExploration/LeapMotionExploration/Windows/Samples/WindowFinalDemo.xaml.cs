@@ -26,16 +26,16 @@ namespace LeapMotionExploration.Windows.Samples
 
         private Controller _controller;
         //A list of the shapes present on the canvas.
-        private List<Shape> _shapes;
+        private List<FrameworkElement> _shapes;
         //A list of the shapes that the user can not drag.
-        private List<Shape> _staticShapes;
+        private List<FrameworkElement> _staticShapes;
 
         //Cursor position
         private LeapListenerOneHandPosition _cursorListener;
         private Boolean _isCursorPositionTracked;
         private LeapListenerOneHandClose _handCloseListener;
 
-        private Shape _hoveredShape;
+        private FrameworkElement _hoveredShape;
 
         //drag motion
         private bool _isDragging;
@@ -77,8 +77,8 @@ namespace LeapMotionExploration.Windows.Samples
             _currentColorPickerItemIndex = 0;
             selectColorItem(_currentColorPickerItemIndex);
 
-            _shapes = new List<Shape>();
-            _staticShapes = new List<Shape>();
+            _shapes = new List<FrameworkElement>();
+            _staticShapes = new List<FrameworkElement>();
 
             Rectangle rect1 = new Rectangle();
             rect1.Height = rect1.Width = 32;
@@ -229,7 +229,7 @@ namespace LeapMotionExploration.Windows.Samples
             if (_hoveredShape!= null && !isCursorOnShape(_hoveredShape, posX, posY)) resetShapeHover();
 
             //look for a new hovered shape
-            foreach (Shape shape in _shapes)
+            foreach (FrameworkElement shape in _shapes)
             {
                 if (isCursorOnShape(shape, posX, posY))
                 {
@@ -251,7 +251,7 @@ namespace LeapMotionExploration.Windows.Samples
             
         }
 
-        private void setShapeHover(Shape shape)
+        private void setShapeHover(FrameworkElement shape)
         {
             //if there is no _hoveredShape or if the shape has a higher index than _hoveredShape
             if (_hoveredShape == null || (_hoveredShape != shape && _shapes.IndexOf(shape) > _shapes.IndexOf(_hoveredShape)))
@@ -265,7 +265,7 @@ namespace LeapMotionExploration.Windows.Samples
             }           
         }
 
-        private Boolean isCursorOnShape(Shape shape, double posX, double posY)
+        private Boolean isCursorOnShape(FrameworkElement shape, double posX, double posY)
         {
             double shapeTop = (double)shape.GetValue(Canvas.TopProperty);
             double shapeLeft = (double)shape.GetValue(Canvas.LeftProperty);
