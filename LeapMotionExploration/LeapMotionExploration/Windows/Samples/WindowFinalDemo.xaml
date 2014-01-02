@@ -40,6 +40,70 @@
             </Canvas.Top>
         </Rectangle>
         
+        <!-- Color Picker Rotating Menu -->
+        <Grid x:Name="mnColorPicker" Width="80" Panel.ZIndex="9000" Canvas.Left="150" RenderTransformOrigin="-1,0.5" Visibility="Hidden">
+            <Grid.RenderTransform>
+                <TransformGroup>
+                    <ScaleTransform/>
+                    <SkewTransform/>
+                    <RotateTransform Angle="0"/>
+                    <TranslateTransform/>
+                </TransformGroup>
+            </Grid.RenderTransform>
+            <Canvas.Top>
+                <MultiBinding Converter="{StaticResource leftMenuItemPositionConverter}">
+                    <Binding ElementName="cursorContainer" Path="ActualHeight"/>
+                    <Binding ElementName="mnColorPicker" Path="ActualHeight" />
+                    <Binding>
+                        <Binding.Source>
+                            <sys:Double>-115</sys:Double>
+                        </Binding.Source>
+                    </Binding>
+                </MultiBinding>
+            </Canvas.Top>
+            <TextBlock x:Name="mnColorPickerBlue" Text="Blue" TextAlignment="Center" Width="80" FontFamily="Roboto Lt" FontSize="16" Background="#33B5E5" Padding="10" HorizontalAlignment="Center" VerticalAlignment="Center" RenderTransformOrigin="-1,0.5">
+                <TextBlock.RenderTransform>
+                    <TransformGroup>
+                        <ScaleTransform/>
+                        <SkewTransform/>
+                        <RotateTransform Angle="-90"/>
+                        <TranslateTransform/>
+                    </TransformGroup>
+                </TextBlock.RenderTransform>
+            </TextBlock>
+            <TextBlock x:Name="mnColorPickerPurple" Text="Purple" TextAlignment="Center" Width="80" FontFamily="Roboto Lt" FontSize="16" Background="#AA66CC" Padding="10" HorizontalAlignment="Center" VerticalAlignment="Center" RenderTransformOrigin="-1,0.5">
+                <TextBlock.RenderTransform>
+                    <TransformGroup>
+                        <ScaleTransform/>
+                        <SkewTransform/>
+                        <RotateTransform Angle="-45"/>
+                        <TranslateTransform/>
+                    </TransformGroup>
+                </TextBlock.RenderTransform>
+            </TextBlock>
+            <TextBlock x:Name="mnColorPickerGreen" Text="Green" TextAlignment="Center" Width="80" FontFamily="Roboto Lt" FontSize="16" Background="#99CC00" Padding="10" HorizontalAlignment="Center" VerticalAlignment="Center" RenderTransformOrigin="-1,0.5"/>
+            <TextBlock x:Name="mnColorPickerOrange" Text="Orange" TextAlignment="Center" Width="80" FontFamily="Roboto Lt" FontSize="16" Background="#FFBB33" Padding="10" HorizontalAlignment="Center" VerticalAlignment="Center" RenderTransformOrigin="-1,0.5">
+                <TextBlock.RenderTransform>
+                    <TransformGroup>
+                        <ScaleTransform/>
+                        <SkewTransform/>
+                        <RotateTransform Angle="45"/>
+                        <TranslateTransform/>
+                    </TransformGroup>
+                </TextBlock.RenderTransform>
+            </TextBlock>
+            <TextBlock x:Name="mnColorPickerRed" Text="Red" TextAlignment="Center" Width="80" FontFamily="Roboto Lt" FontSize="16" Background="#FF4444" Padding="10" HorizontalAlignment="Center" VerticalAlignment="Center" RenderTransformOrigin="-1,0.5">
+                <TextBlock.RenderTransform>
+                    <TransformGroup>
+                        <ScaleTransform/>
+                        <SkewTransform/>
+                        <RotateTransform Angle="90"/>
+                        <TranslateTransform/>
+                    </TransformGroup>
+                </TextBlock.RenderTransform>
+            </TextBlock>
+        </Grid>
+        
         <!-- Preview -->
         <Ellipse x:Name="preview" Width="100" Height="100" Fill="#AA66CC" Canvas.Left="75" >
             <Canvas.Top>
