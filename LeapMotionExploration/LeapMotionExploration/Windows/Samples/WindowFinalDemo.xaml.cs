@@ -32,7 +32,10 @@ namespace LeapMotionExploration.Windows.Samples
         private const int MIN_HEIGHT = 75;
 
         private const int DEFAULT_HEIGHT = 150;
-        private const int DEFAULT_WIDTH = 150;        
+        private const int DEFAULT_WIDTH = 150;
+
+        private const double SHAPE_CANDIDATE_LEFT_MARGIN = 180d;
+        private const double SHAPE_CANDIDATE_MAX_SPAWN_DISTANCE = 200d;
         
         private Controller _controller;
         //A list of the graphic elements present on the canvas.
@@ -66,7 +69,9 @@ namespace LeapMotionExploration.Windows.Samples
         private TextBlock[] _mnShapePickerItems;
         private int _currentShapePickerItemIndex;
 
-        private Shape _currentCandidateShape;
+        private MultiBinding _mbCanvasTop;
+        private Shape _currentShapeCandidate;
+        private Point _currentShapeCandidateSpawn;
 
         private Point _currentCursorPoint;
 
@@ -111,6 +116,22 @@ namespace LeapMotionExploration.Windows.Samples
 
             cursorContainer.Children.Add(rect1);
 
+            _mbCanvasTop = new MultiBinding();
+            _mbCanvasTop.Converter = new LeftMenuItemCanvasTopConverter();
+
+            Binding containerHeight = new Binding("ActualHeight");
+            containerHeight.ElementName = cursorContainer.Name;
+
+            Binding selfHeight = new Binding("ActualHeight");
+            selfHeight.RelativeSource = RelativeSource.Self;
+
+            Binding marginTop = new Binding();
+            marginTop.Source = 0d;
+
+            _mbCanvasTop.Bindings.Add(containerHeight);
+            _mbCanvasTop.Bindings.Add(selfHeight);
+            _mbCanvasTop.Bindings.Add(marginTop);
+
 
             _graphicElements.Add(colorPicker);
             _graphicElements.Add(shapePicker);
@@ -120,7 +141,7 @@ namespace LeapMotionExploration.Windows.Samples
             _staticGraphicElements.Add(shapePicker);
 
             selectShapeItem(_currentShapePickerItemIndex);
-            selectColorItem(_currentColorPickerItemIndex);        
+            selectColorItem(_currentColorPickerItemIndex);       
         }
 
         private void OnPositionChange(LeapEvent leapEvent)
@@ -156,76 +177,60 @@ namespace LeapMotionExploration.Windows.Samples
 
         private void updateCandidateShapeColor()
         {
-            if (_currentCandidateShape == null)
+            if (_currentShapeCandidate == null)
             {
                 createCandidateShape();
             }
             else
             {
-                _currentCandidateShape.Fill = _mnColorPickerItems[_currentColorPickerItemIndex].Background;
+                _currentShapeCandidate.Fill = _mnColorPickerItems[_currentColorPickerItemIndex].Background;
             }
         }
 
         private void createCandidateShape()
         {
 
-            if (_currentCandidateShape != null)
+            if (_currentShapeCandidate != null)
             {
-                cursorContainer.Children.Remove(_currentCandidateShape);
-                _graphicElements.Remove(_currentCandidateShape);
-
-                _currentCandidateShape = null;
+                cursorContainer.Children.Remove(_currentShapeCandidate);
+                _graphicElements.Remove(_currentShapeCandidate);
+                _currentShapeCandidate = null;
             }
 
             switch(_currentShapePickerItemIndex)
             {
                 case 0:
                     //Rectangle
-                    _currentCandidateShape = new Rectangle();
-                    _currentCandidateShape.Width = DEFAULT_WIDTH;
-                    _currentCandidateShape.Height = DEFAULT_HEIGHT;
+                    _currentShapeCandidate = new Rectangle();
+                    _currentShapeCandidate.Width = DEFAULT_WIDTH;
+                    _currentShapeCandidate.Height = DEFAULT_HEIGHT;
                     break;
 
                 case 1:
                     //Circle
-                    _currentCandidateShape = new Ellipse();
-                    _currentCandidateShape.Width = DEFAULT_WIDTH;
-                    _currentCandidateShape.Height = DEFAULT_HEIGHT;
+                    _currentShapeCandidate = new Ellipse();
+                    _currentShapeCandidate.Width = DEFAULT_WIDTH;
+                    _currentShapeCandidate.Height = DEFAULT_HEIGHT;
                     break;
 
                 case 2:
                     //Ellipse
-                    _currentCandidateShape = new Ellipse();
-                    _currentCandidateShape.Width = DEFAULT_WIDTH;
-                    _currentCandidateShape.Height = Math.Max(DEFAULT_HEIGHT / 2, MIN_HEIGHT);
+                    _currentShapeCandidate = new Ellipse();
+                    _currentShapeCandidate.Width = DEFAULT_WIDTH;
+                    _currentShapeCandidate.Height = Math.Max(DEFAULT_HEIGHT / 2, MIN_HEIGHT);
                     break;
             }
 
-            if (_currentCandidateShape != null)
+            if (_currentShapeCandidate != null)
             {
-                _currentCandidateShape.Fill = _mnColorPickerItems[_currentColorPickerItemIndex].Background;
+                _currentShapeCandidate.Fill = _mnColorPickerItems[_currentColorPickerItemIndex].Background;
 
-                MultiBinding mbCanvasTop = new MultiBinding();
-                mbCanvasTop.Converter = new LeftMenuItemCanvasTopConverter();
+                _currentShapeCandidate.SetBinding(Canvas.TopProperty, _mbCanvasTop);
+                _currentShapeCandidate.SetValue(Canvas.LeftProperty, SHAPE_CANDIDATE_LEFT_MARGIN);
 
-                Binding containerHeight = new Binding("ActualHeight");
-                containerHeight.ElementName = cursorContainer.Name;
+                cursorContainer.Children.Add(_currentShapeCandidate);
+                _graphicElements.Add(_currentShapeCandidate);
 
-                Binding selfHeight = new Binding("ActualHeight");
-                selfHeight.RelativeSource = RelativeSource.Self;
-
-                Binding marginTop = new Binding();
-                marginTop.Source = 0d;
-
-                mbCanvasTop.Bindings.Add(containerHeight);
-                mbCanvasTop.Bindings.Add(selfHeight);
-                mbCanvasTop.Bindings.Add(marginTop);
-
-                _currentCandidateShape.SetBinding(Canvas.TopProperty, mbCanvasTop);
-                _currentCandidateShape.SetValue(Canvas.LeftProperty, 180d);
-
-                cursorContainer.Children.Add(_currentCandidateShape);
-                _graphicElements.Add(_currentCandidateShape);
             }
 
         }
@@ -600,27 +605,48 @@ namespace LeapMotionExploration.Windows.Samples
                 leapCursor.Fill = new SolidColorBrush(Color.FromArgb(255, 255, 255, 0));
                 SetDraggingOverlay();
 
+                //Save the current spawning point
+                if(_hoveredGraphicElement.Equals(_currentShapeCandidate))
+                {
+                    _currentShapeCandidateSpawn = new Point(SHAPE_CANDIDATE_LEFT_MARGIN + _currentShapeCandidate.ActualWidth / 2, cursorContainer.ActualHeight / 2);
+                }
             }));
 
         }
+
+        
+
+        
 
         private void DragMoved()
         {
 
             Application.Current.Dispatcher.Invoke(new Action(() =>
             {
-
                 //Get the current cursor position
                 Point current = new Point(Canvas.GetLeft(leapCursor), Canvas.GetTop(leapCursor));
-
 
                 //Calculate the offset
                 Point offset = new Point(_startCursorPoint.X - current.X, _startCursorPoint.Y - current.Y);
 
-
                 //Update the element position
                 Canvas.SetTop(_hoveredGraphicElement, _originalGraphicElementPoint.Y - offset.Y);
                 Canvas.SetLeft(_hoveredGraphicElement, _originalGraphicElementPoint.X - offset.X);
+
+                //If the current candidate shape is being dragged,
+                //Check if it went to far from the spawning point.
+                if (_hoveredGraphicElement.Equals(_currentShapeCandidate))
+                {                    
+                    double currentDistance = Math.Sqrt(Math.Pow(_currentShapeCandidateSpawn.X - (Canvas.GetLeft(_currentShapeCandidate) +  _currentShapeCandidate.ActualWidth / 2), 2) 
+                        + Math.Pow(_currentShapeCandidateSpawn.Y - (Canvas.GetTop(_currentShapeCandidate) + _currentShapeCandidate.ActualHeight / 2), 2));
+                    System.Diagnostics.Debug.WriteLine("Dist " + currentDistance.ToString());
+                    if (currentDistance > SHAPE_CANDIDATE_MAX_SPAWN_DISTANCE)
+                    {
+                        //The current candidate shape went to far and can no longer be considered as a candidate.
+                        _currentShapeCandidate = null;
+                        createCandidateShape();
+                    }
+                }
             }));
 
         }
@@ -646,6 +672,13 @@ namespace LeapMotionExploration.Windows.Samples
                     _graphicElements.Remove(_hoveredGraphicElement);
                     cursorContainer.Children.Remove(_hoveredGraphicElement);
                     _hoveredGraphicElement = null;
+                }
+
+                //Reset the position of the current candidate shape.
+                if (_hoveredGraphicElement != null && _hoveredGraphicElement.Equals(_currentShapeCandidate))
+                {
+                    _currentShapeCandidate.SetBinding(Canvas.TopProperty, _mbCanvasTop);
+                    _currentShapeCandidate.SetValue(Canvas.LeftProperty, SHAPE_CANDIDATE_LEFT_MARGIN);
                 }
             }));
         }
