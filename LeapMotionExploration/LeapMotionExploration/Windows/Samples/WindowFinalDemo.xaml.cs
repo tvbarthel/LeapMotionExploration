@@ -16,6 +16,7 @@ using MyLeap.Listener;
 using MyLeap.Utils;
 using MyLeap.Event;
 using LeapMotionExploration.Windows.Samples.Ui;
+using System.Windows.Media.Effects;
 
 namespace LeapMotionExploration.Windows.Samples
 {
@@ -371,11 +372,26 @@ namespace LeapMotionExploration.Windows.Samples
                 {
                     _hoveredGraphicElement.Opacity = 1;
                     _hoveredGraphicElement = null;
-                    AdornerLayer.GetAdornerLayer(_draggableHoveredAdorner.AdornedElement).Remove(_draggableHoveredAdorner);
-                    _draggableHoveredAdorner = null;
+                    resetDraggableOverlay();
                 }));
             }
             
+        }
+
+        private void setDraggableOverlay(FrameworkElement graphicElement)
+        {
+            _draggableHoveredAdorner = new DraggableHoveredAdorner(graphicElement);
+            AdornerLayer layer = AdornerLayer.GetAdornerLayer(graphicElement);
+            layer.Add(_draggableHoveredAdorner);
+        }
+
+        private void resetDraggableOverlay(){
+            if (_draggableHoveredAdorner != null)
+            {
+                AdornerLayer.GetAdornerLayer(_draggableHoveredAdorner.AdornedElement).Remove(_draggableHoveredAdorner);
+                _draggableHoveredAdorner = null;
+
+            }
         }
 
         private void setHoveredGraphicElement(FrameworkElement graphicElement)
@@ -387,10 +403,15 @@ namespace LeapMotionExploration.Windows.Samples
                 _hoveredGraphicElement = graphicElement;
                 Application.Current.Dispatcher.Invoke(new Action(() =>
                 {
-                    _hoveredGraphicElement.Opacity = 0.5;
-                    _draggableHoveredAdorner = new DraggableHoveredAdorner(graphicElement);
-                    AdornerLayer layer = AdornerLayer.GetAdornerLayer(graphicElement);
-                    layer.Add(_draggableHoveredAdorner);
+                    if (!_staticGraphicElements.Contains(graphicElement))
+                    {
+                        setDraggableOverlay(graphicElement);
+                       
+                    }
+                    else
+                    {
+                        _hoveredGraphicElement.Opacity = 0.5;
+                    }
                 }));
             }           
         }
@@ -452,6 +473,15 @@ namespace LeapMotionExploration.Windows.Samples
 
                 //ui
                 leapCursor.Fill = new SolidColorBrush(Color.FromArgb(255, 255, 255, 0));
+                resetDraggableOverlay();
+                _hoveredGraphicElement.Effect = new DropShadowEffect
+                {
+                    Color = Colors.Black,
+                    Direction = 320,
+                    ShadowDepth = 7,
+                    Opacity = 0.8,
+                    BlurRadius = 4
+                };
 
             }));
 
@@ -491,6 +521,8 @@ namespace LeapMotionExploration.Windows.Samples
 
                 //ui
                 leapCursor.Fill = new SolidColorBrush(Color.FromArgb(0, 0, 0, 0));
+                _hoveredGraphicElement.Effect = null;
+                setDraggableOverlay(_hoveredGraphicElement);
 
                 //TODO check drop area
                 if (isCursorOnGraphicElement(basket, _currentCursorPoint.X, _currentCursorPoint.Y))
