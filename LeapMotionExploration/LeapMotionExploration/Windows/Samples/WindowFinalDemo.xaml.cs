@@ -15,6 +15,7 @@ using Leap;
 using MyLeap.Listener;
 using MyLeap.Utils;
 using MyLeap.Event;
+using LeapMotionExploration.Windows.Samples.Ui;
 
 namespace LeapMotionExploration.Windows.Samples
 {
@@ -35,7 +36,9 @@ namespace LeapMotionExploration.Windows.Samples
         private Boolean _isCursorPositionTracked;
         private LeapListenerOneHandClose _handCloseListener;
 
-        private FrameworkElement _hoveredGraphicElement;
+        //hovered
+        private FrameworkElement _hoveredGraphicElement;        
+        private DraggableHoveredAdorner _draggableHoveredAdorner;
 
         //drag motion
         private bool _isDragging;
@@ -138,7 +141,8 @@ namespace LeapMotionExploration.Windows.Samples
 
         private void rotationSelectionEvent(LeapEvent leapEvent)
         {
-            if (_hoveredGraphicElement.Equals(colorPicker))
+
+            if (_hoveredGraphicElement != null && _hoveredGraphicElement.Equals(colorPicker))
             {
                 colorSelectionEvent(leapEvent);
             }
@@ -246,6 +250,8 @@ namespace LeapMotionExploration.Windows.Samples
                 {
                     _hoveredGraphicElement.Opacity = 1;
                     _hoveredGraphicElement = null;
+                    AdornerLayer.GetAdornerLayer(_draggableHoveredAdorner.AdornedElement).Remove(_draggableHoveredAdorner);
+                    _draggableHoveredAdorner = null;
                 }));
             }
             
@@ -261,6 +267,9 @@ namespace LeapMotionExploration.Windows.Samples
                 Application.Current.Dispatcher.Invoke(new Action(() =>
                 {
                     _hoveredGraphicElement.Opacity = 0.5;
+                    _draggableHoveredAdorner = new DraggableHoveredAdorner(graphicElement);
+                    AdornerLayer layer = AdornerLayer.GetAdornerLayer(graphicElement);
+                    layer.Add(_draggableHoveredAdorner);
                 }));
             }           
         }
@@ -367,6 +376,7 @@ namespace LeapMotionExploration.Windows.Samples
                 {
                     _graphicElements.Remove(_hoveredGraphicElement);
                     cursorContainer.Children.Remove(_hoveredGraphicElement);
+                    _hoveredGraphicElement = null;
                 }
             }));
         }
