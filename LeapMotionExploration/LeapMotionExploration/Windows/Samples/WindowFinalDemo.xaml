@@ -146,9 +146,8 @@
                         </Binding.Source>
                     </Binding>
                 </MultiBinding>
-            </Canvas.Top>
-            
-            <Ellipse x:Name="shapePickerOld" Width="100" Height="100" Stroke="#000000" StrokeThickness="2" />            
+            </Canvas.Top>         
+                     
         </Grid>
 
         <!-- Shape Picker Rotating Menu -->

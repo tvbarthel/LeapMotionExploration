@@ -45,10 +45,16 @@ namespace LeapMotionExploration.Windows.Samples
         private Point _originalGraphicElementPoint;
         private Point _startCursorPoint;
 
+        //Rotating selection
+        private LeapListenerRotateSelection _rotatingSelectionListener;
+
         //Color rotating selection
         private TextBlock[] _mnColorPickerItems;
         private int _currentColorPickerItemIndex;
-        private LeapListenerRotateSelection _rotatingSelectionListener;
+        
+        //Shape rotation selection
+        private TextBlock[] _mnShapePickerItems;
+        private int _currentShapePickerItemIndex;
 
         private Point _currentCursorPoint;
 
@@ -79,6 +85,10 @@ namespace LeapMotionExploration.Windows.Samples
             _mnColorPickerItems = new TextBlock[] { mnColorPickerBlue, mnColorPickerPurple, mnColorPickerGreen, mnColorPickerOrange, mnColorPickerRed };
             _currentColorPickerItemIndex = 0;
             selectColorItem(_currentColorPickerItemIndex);
+
+            _mnShapePickerItems = new TextBlock[] { mnShapePickerRectangle, mnShapePickerCircle, mnShapePickerEllipse };
+            _currentShapePickerItemIndex = 0;
+            selectShapeItem(_currentShapePickerItemIndex);
 
             _graphicElements = new List<FrameworkElement>();
             _staticGraphicElements = new List<FrameworkElement>();
@@ -136,15 +146,48 @@ namespace LeapMotionExploration.Windows.Samples
          * Rotation Selection
          * 
          * rotationSelectionEvent(LeapEvent leapEvent)
+         * shapeSelectionEvent(LeapEvent leapEvent)
          * colorSelectionEvent(LeapEvent leapEvent)
          */
 
         private void rotationSelectionEvent(LeapEvent leapEvent)
         {
 
-            if (_hoveredGraphicElement != null && _hoveredGraphicElement.Equals(colorPicker))
+            if (_hoveredGraphicElement != null)
             {
-                colorSelectionEvent(leapEvent);
+                if (_hoveredGraphicElement.Equals(colorPicker))
+                {
+                    colorSelectionEvent(leapEvent);
+                }
+                else if (_hoveredGraphicElement.Equals(shapePicker))
+                {
+                    shapeSelectionEvent(leapEvent);
+                }
+                
+            }
+        }
+
+        private void shapeSelectionEvent(LeapEvent leapEvent)
+        {
+            switch(leapEvent.Type)
+            {
+                case LeapEvent.ROTATION_SELECTION_START:
+                    _isCursorPositionTracked = false;
+                    setMenuVisibility(mnShapePicker, Visibility.Visible);
+                    break;
+
+                case LeapEvent.ROTATION_SELECTION_NEXT:
+                    selectNextShape();
+                    break;
+                    
+                case LeapEvent.ROTATION_SELECTION_PREVIOUS:
+                    selectPreviousShape();
+                    break;
+
+                case LeapEvent.ROTATION_SELECTION_END:
+                    _isCursorPositionTracked = true;
+                    setMenuVisibility(mnShapePicker, Visibility.Hidden);
+                    break;
             }
         }
 
@@ -154,7 +197,7 @@ namespace LeapMotionExploration.Windows.Samples
             {
                 case LeapEvent.ROTATION_SELECTION_START:
                     _isCursorPositionTracked = false;
-                    setColorMenuVisibility(Visibility.Visible);
+                    setMenuVisibility(mnColorPicker, Visibility.Visible);
                     break;
 
                 case LeapEvent.ROTATION_SELECTION_NEXT:
@@ -167,7 +210,7 @@ namespace LeapMotionExploration.Windows.Samples
 
                 case LeapEvent.ROTATION_SELECTION_END:
                     _isCursorPositionTracked = true;
-                    setColorMenuVisibility(Visibility.Hidden);
+                    setMenuVisibility(mnColorPicker, Visibility.Hidden);
                     break;
             }
         }   
@@ -180,17 +223,11 @@ namespace LeapMotionExploration.Windows.Samples
          * selectNextColor()
          * selectPreviousColor()
          * updateCurrentColorSelection()
-         * setColorMenuVisibility(Visibility visibility)
          */
 
         private void selectColorItem(int i)
         {
-            mnColorPicker.RenderTransform = new RotateTransform(90 - 45 * i);
-            foreach (TextBlock textBlock in _mnColorPickerItems)
-            {
-                textBlock.Opacity = 0.4;
-            }
-            _mnColorPickerItems[i].Opacity = 1;
+            selectItem(mnColorPicker, _mnColorPickerItems, i);
             colorPicker.Fill = _mnColorPickerItems[i].Background;
         }
 
@@ -214,11 +251,95 @@ namespace LeapMotionExploration.Windows.Samples
             }));
         }
 
-        private void setColorMenuVisibility(Visibility visibility)
+        /**
+         * Shape Rotating Picker
+         * 
+         * selectShapeItem(int i)
+         * selectNextShape()
+         * selectPreviousShape()
+         * updateCurrentShapeSelection() 
+         */
+
+        private void selectShapeItem(int i)
+        {
+            selectItem(mnShapePicker, _mnShapePickerItems, i);
+            Shape newShape = null;
+            switch(i)
+            {
+                case 0:
+                    //Rectangle
+                    newShape = new Rectangle();
+                    newShape.Width = 100;
+                    newShape.Height = 100;
+                    break;
+
+                case 1:
+                    //Circle
+                    newShape = new Ellipse();
+                    newShape.Width = 100;
+                    newShape.Height = 100;
+                    break;
+
+                case 2:
+                    //Ellipse
+                    newShape = new Ellipse();
+                    newShape.Width = 100;
+                    newShape.Height = 50;
+                    break;
+
+            }
+
+            if (newShape != null)
+            {
+                newShape.Stroke = new SolidColorBrush(Color.FromRgb(0, 0, 0));
+                newShape.StrokeThickness = 2;
+                shapePicker.Children.Clear();
+                shapePicker.Children.Add(newShape);
+            }
+            
+        }
+
+        private void selectNextShape() {
+            _currentShapePickerItemIndex = Math.Min(_mnShapePickerItems.Count(), _currentShapePickerItemIndex + 1);
+            updateCurrentShapeSelection();
+        }
+
+        private void selectPreviousShape()
+        {
+            _currentShapePickerItemIndex = Math.Max(0, _currentShapePickerItemIndex - 1);
+            updateCurrentShapeSelection();
+        }
+
+        private void updateCurrentShapeSelection()
         {
             Application.Current.Dispatcher.Invoke(new Action(() =>
             {
-                mnColorPicker.Visibility = visibility;
+                selectShapeItem(_currentShapePickerItemIndex);
+            }));
+        }
+
+        /**
+         * Rotating Picker
+         * 
+         * selectItem(FrameworkElement menu, FrameworkElement[] items, int index)
+         * setMenuVisibility(FrameworkElement menu, Visibility visibility)
+         */
+
+        private void selectItem(FrameworkElement menu, FrameworkElement[] items, int index)
+        {
+            menu.RenderTransform = new RotateTransform(90 - 45 * index);
+            foreach(FrameworkElement item in items)
+            {
+                item.Opacity = 0.4;
+            }
+            items[index].Opacity = 1;
+        }
+
+        private void setMenuVisibility(FrameworkElement menu, Visibility visibility)
+        {
+            Application.Current.Dispatcher.Invoke(new Action(() =>
+            {
+                menu.Visibility = visibility;
             }));
         }
 
