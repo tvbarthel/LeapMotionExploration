@@ -606,7 +606,6 @@ namespace LeapMotionExploration.Windows.Samples
                 {                    
                     double currentDistance = Math.Sqrt(Math.Pow(_currentShapeCandidateSpawn.X - (Canvas.GetLeft(_currentShapeCandidate) +  _currentShapeCandidate.ActualWidth / 2), 2) 
                         + Math.Pow(_currentShapeCandidateSpawn.Y - (Canvas.GetTop(_currentShapeCandidate) + _currentShapeCandidate.ActualHeight / 2), 2));
-                    System.Diagnostics.Debug.WriteLine("Dist " + currentDistance.ToString());
                     if (currentDistance > SHAPE_CANDIDATE_MAX_SPAWN_DISTANCE)
                     {
                         //The current candidate shape went to far and can no longer be considered as a candidate.
