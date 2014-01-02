@@ -94,17 +94,15 @@ namespace LeapMotionExploration.Windows.Samples
             _controller.AddListener(_rotatingSelectionListener);
             _rotatingSelectionListener.OnStateChange += rotationSelectionEvent;
 
+            _mnShapePickerItems = new TextBlock[] { mnShapePickerRectangle, mnShapePickerCircle, mnShapePickerEllipse };
+            _currentShapePickerItemIndex = 0;            
+
             _mnColorPickerItems = new TextBlock[] { mnColorPickerBlue, mnColorPickerPurple, mnColorPickerGreen, mnColorPickerOrange, mnColorPickerRed };
             _currentColorPickerItemIndex = 0;
-            selectColorItem(_currentColorPickerItemIndex);
-
-            _mnShapePickerItems = new TextBlock[] { mnShapePickerRectangle, mnShapePickerCircle, mnShapePickerEllipse };
-            _currentShapePickerItemIndex = 0;
-            selectShapeItem(_currentShapePickerItemIndex);
 
             _graphicElements = new List<FrameworkElement>();
             _staticGraphicElements = new List<FrameworkElement>();
-
+            
             Rectangle rect1 = new Rectangle();
             rect1.Height = rect1.Width = 32;
             rect1.Fill = Brushes.Blue;
@@ -121,7 +119,8 @@ namespace LeapMotionExploration.Windows.Samples
             _staticGraphicElements.Add(colorPicker);
             _staticGraphicElements.Add(shapePicker);
 
-            createCandidateShape();
+            selectShapeItem(_currentShapePickerItemIndex);
+            selectColorItem(_currentColorPickerItemIndex);        
         }
 
         private void OnPositionChange(LeapEvent leapEvent)
@@ -155,12 +154,26 @@ namespace LeapMotionExploration.Windows.Samples
 
         }
 
+        private void updateCandidateShapeColor()
+        {
+            if (_currentCandidateShape == null)
+            {
+                createCandidateShape();
+            }
+            else
+            {
+                _currentCandidateShape.Fill = _mnColorPickerItems[_currentColorPickerItemIndex].Background;
+            }
+        }
+
         private void createCandidateShape()
         {
 
             if (_currentCandidateShape != null)
             {
                 cursorContainer.Children.Remove(_currentCandidateShape);
+                _graphicElements.Remove(_currentCandidateShape);
+
                 _currentCandidateShape = null;
             }
 
@@ -304,6 +317,7 @@ namespace LeapMotionExploration.Windows.Samples
         {
             selectItem(mnColorPicker, _mnColorPickerItems, i);
             colorPicker.Fill = _mnColorPickerItems[i].Background;
+            updateCandidateShapeColor();
         }
 
         private void selectNextColor()
@@ -370,6 +384,7 @@ namespace LeapMotionExploration.Windows.Samples
                 newShape.StrokeThickness = 2;
                 shapePicker.Children.Clear();
                 shapePicker.Children.Add(newShape);
+                createCandidateShape();
             }
             
         }
