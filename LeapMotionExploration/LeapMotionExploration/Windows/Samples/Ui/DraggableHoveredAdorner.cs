@@ -22,19 +22,9 @@ namespace LeapMotionExploration.Windows.Samples.Ui
         public DraggableHoveredAdorner(UIElement adornedElement)
             : base(adornedElement)
         {
-            VisualBrush _brush = new VisualBrush(adornedElement);
-
             _child = new Rectangle();
             _child.Width = adornedElement.RenderSize.Width;
             _child.Height = adornedElement.RenderSize.Height;
-           
-
-            DoubleAnimation animation = new DoubleAnimation(0.3, 1, new Duration(TimeSpan.FromSeconds(1)));
-            animation.AutoReverse = true;
-            animation.RepeatBehavior =  System.Windows.Media.Animation.RepeatBehavior.Forever;
-            _brush.BeginAnimation(System.Windows.Media.Brush.OpacityProperty, animation);
-
-            _child.Fill = _brush;
         }
 
         // A common way to implement an adorner's rendering behavior is to override the OnRender
