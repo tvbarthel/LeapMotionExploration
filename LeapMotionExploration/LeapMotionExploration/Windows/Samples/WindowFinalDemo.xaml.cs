@@ -39,7 +39,7 @@ namespace LeapMotionExploration.Windows.Samples
         private LeapListenerOneHandClose _handCloseListener;
 
         //hovered
-        private FrameworkElement _hoveredGraphicElement;        
+        private FrameworkElement _hoveredGraphicElement;
         private DraggableHoveredAdorner _draggableHoveredAdorner;
 
         //drag motion
@@ -57,7 +57,7 @@ namespace LeapMotionExploration.Windows.Samples
         //Color rotating selection
         private TextBlock[] _mnColorPickerItems;
         private int _currentColorPickerItemIndex;
-        
+
         //Shape rotation selection
         private TextBlock[] _mnShapePickerItems;
         private int _currentShapePickerItemIndex;
@@ -69,7 +69,7 @@ namespace LeapMotionExploration.Windows.Samples
             InitializeComponent();
 
             _isDragging = false;
-            _currentCursorPoint = new Point(0,0);
+            _currentCursorPoint = new Point(0, 0);
             _originalGraphicElementPoint = new Point(0, 0);
             _startCursorPoint = new Point(0, 0);
 
@@ -169,13 +169,13 @@ namespace LeapMotionExploration.Windows.Samples
                 {
                     shapeSelectionEvent(leapEvent);
                 }
-                
+
             }
         }
 
         private void shapeSelectionEvent(LeapEvent leapEvent)
         {
-            switch(leapEvent.Type)
+            switch (leapEvent.Type)
             {
                 case LeapEvent.ROTATION_SELECTION_START:
                     _isCursorPositionTracked = false;
@@ -185,7 +185,7 @@ namespace LeapMotionExploration.Windows.Samples
                 case LeapEvent.ROTATION_SELECTION_NEXT:
                     selectNextShape();
                     break;
-                    
+
                 case LeapEvent.ROTATION_SELECTION_PREVIOUS:
                     selectPreviousShape();
                     break;
@@ -219,7 +219,7 @@ namespace LeapMotionExploration.Windows.Samples
                     setMenuVisibility(mnColorPicker, Visibility.Hidden);
                     break;
             }
-        }   
+        }
 
 
         /**
@@ -239,7 +239,7 @@ namespace LeapMotionExploration.Windows.Samples
 
         private void selectNextColor()
         {
-            _currentColorPickerItemIndex = Math.Min(_mnColorPickerItems.Count()-1, _currentColorPickerItemIndex + 1);
+            _currentColorPickerItemIndex = Math.Min(_mnColorPickerItems.Count() - 1, _currentColorPickerItemIndex + 1);
             updateCurrentColorSelection();
         }
 
@@ -270,7 +270,7 @@ namespace LeapMotionExploration.Windows.Samples
         {
             selectItem(mnShapePicker, _mnShapePickerItems, i);
             Shape newShape = null;
-            switch(i)
+            switch (i)
             {
                 case 0:
                     //Rectangle
@@ -302,11 +302,12 @@ namespace LeapMotionExploration.Windows.Samples
                 shapePicker.Children.Clear();
                 shapePicker.Children.Add(newShape);
             }
-            
+
         }
 
-        private void selectNextShape() {
-            _currentShapePickerItemIndex = Math.Min(_mnShapePickerItems.Count()-1, _currentShapePickerItemIndex + 1);
+        private void selectNextShape()
+        {
+            _currentShapePickerItemIndex = Math.Min(_mnShapePickerItems.Count() - 1, _currentShapePickerItemIndex + 1);
             updateCurrentShapeSelection();
         }
 
@@ -334,7 +335,7 @@ namespace LeapMotionExploration.Windows.Samples
         private void selectItem(FrameworkElement menu, FrameworkElement[] items, int index)
         {
             menu.RenderTransform = new RotateTransform(90 - 45 * index);
-            foreach(FrameworkElement item in items)
+            foreach (FrameworkElement item in items)
             {
                 item.Opacity = 0.4;
             }
@@ -357,7 +358,7 @@ namespace LeapMotionExploration.Windows.Samples
         private void updateHover(double posX, double posY)
         {
             //reset the current hovered graphic element if needed
-            if (_hoveredGraphicElement!= null && !isCursorOnGraphicElement(_hoveredGraphicElement, posX, posY)) resetHoveredGraphicElement();
+            if (_hoveredGraphicElement != null && !isCursorOnGraphicElement(_hoveredGraphicElement, posX, posY)) resetHoveredGraphicElement();
 
             //look for a new hovered graphic element
             foreach (FrameworkElement graphicElement in _graphicElements)
@@ -366,7 +367,7 @@ namespace LeapMotionExploration.Windows.Samples
                 {
                     setHoveredGraphicElement(graphicElement);
                 }
-            }            
+            }
         }
 
         private void resetHoveredGraphicElement()
@@ -380,7 +381,7 @@ namespace LeapMotionExploration.Windows.Samples
                     UnsetDraggableOverlay();
                 }));
             }
-            
+
         }
 
 
@@ -396,21 +397,32 @@ namespace LeapMotionExploration.Windows.Samples
                     if (!_staticGraphicElements.Contains(graphicElement))
                     {
                         SetDraggableOverlay(graphicElement);
-                       
+
                     }
                     else
                     {
                         _hoveredGraphicElement.Opacity = 0.5;
                     }
                 }));
-            }           
+            }
         }
 
         private Boolean isCursorOnGraphicElement(FrameworkElement graphicElement, double posX, double posY)
         {
-            double graphicElementTop = (double)graphicElement.GetValue(Canvas.TopProperty);
-            double graphicElementLeft = (double)graphicElement.GetValue(Canvas.LeftProperty);
-            return (posX > graphicElementLeft && posX < (graphicElementLeft + graphicElement.ActualWidth) && posY > graphicElementTop && posY < (graphicElementTop + graphicElement.ActualHeight));
+            double graphicElementTop = Canvas.GetTop(graphicElement);
+            double graphicElementLeft = Canvas.GetLeft(graphicElement);
+            if (double.IsNaN(graphicElementTop) || double.IsNaN(graphicElementLeft))
+            {
+                double graphicElementRight = Canvas.GetRight(graphicElement);
+                double graphicElementBottom = Canvas.GetBottom(graphicElement);
+                if (!double.IsNaN(graphicElementRight) && !double.IsNaN(graphicElementBottom))
+                {
+                    graphicElementTop = cursorContainer.ActualHeight - graphicElementBottom -graphicElement.ActualHeight;
+                    graphicElementLeft = cursorContainer.ActualWidth - graphicElementRight - graphicElement.ActualWidth;
+                    System.Diagnostics.Debug.WriteLine(graphicElementTop + " " + graphicElementLeft);
+                }
+            }
+            return (posX > graphicElementLeft && posX < (graphicElementLeft + graphicElement.ActualWidth) && posY > graphicElementTop && posY < (graphicElementTop + graphicElement.ActualHeight)); ;
         }
 
         protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
@@ -487,7 +499,7 @@ namespace LeapMotionExploration.Windows.Samples
                 //Calculate the offset
                 Point offset = new Point(_startCursorPoint.X - current.X, _startCursorPoint.Y - current.Y);
 
-                //check basket area
+                //check basket area                
                 if (isCursorOnGraphicElement(basket, _currentCursorPoint.X, _currentCursorPoint.Y))
                 {
                     SetDeleteOverlay();
@@ -538,7 +550,7 @@ namespace LeapMotionExploration.Windows.Samples
          * 
          */
 
-        
+
         //Drag
         private void SetDraggingOverlay()
         {
