@@ -29,7 +29,10 @@ namespace LeapMotionExploration.Windows.Samples
         private List<Shape> _shapes;
         //A list of the shapes that the user can not drag.
         private List<Shape> _staticShapes;
+
+        //Cursor position
         private LeapListenerOneHandPosition _cursorListener;
+        private Boolean _isCursorPositionTracked;
         private LeapListenerOneHandClose _handCloseListener;
 
         private Shape _hoveredShape;
@@ -38,6 +41,11 @@ namespace LeapMotionExploration.Windows.Samples
         private bool _isDragging;
         private Point _originalShapePoint;
         private Point _startCursorPoint;
+
+        //Color rotating selection
+        private TextBlock[] _mnColorPickerItems;
+        private int _currentColorPickerItemIndex;
+        private LeapListenerRotateSelection _rotatingSelectionListener;
 
         private Point _currentCursorPoint;
 
@@ -53,12 +61,21 @@ namespace LeapMotionExploration.Windows.Samples
             _controller = new Controller();
 
             _cursorListener = new LeapListenerOneHandPosition(LeapUtils.LEFT_MOST_HAND);
+            _isCursorPositionTracked = true;
             _controller.AddListener(_cursorListener);
             _cursorListener.OnStateChange += this.OnPositionChange;
 
             _handCloseListener = new LeapListenerOneHandClose(LeapUtils.LEFT_MOST_HAND);
             _controller.AddListener(_handCloseListener);
             _handCloseListener.OnHandStateChange += this.OnHandClosed;
+
+            _rotatingSelectionListener = new LeapListenerRotateSelection();
+            _controller.AddListener(_rotatingSelectionListener);
+            _rotatingSelectionListener.OnStateChange += rotationSelectionEvent;
+
+            _mnColorPickerItems = new TextBlock[] { mnColorPickerBlue, mnColorPickerPurple, mnColorPickerGreen, mnColorPickerOrange, mnColorPickerRed };
+            _currentColorPickerItemIndex = 0;
+            selectColorItem(_currentColorPickerItemIndex);
 
             _shapes = new List<Shape>();
             _staticShapes = new List<Shape>();
@@ -91,10 +108,13 @@ namespace LeapMotionExploration.Windows.Samples
 
             Application.Current.Dispatcher.Invoke(new Action(() =>
             {
-                _currentCursorPoint.X = cursorContainer.ActualWidth * position.x;
-                _currentCursorPoint.Y = cursorContainer.ActualHeight * (1 - position.y);
-                leapCursor.SetValue(Canvas.TopProperty, _currentCursorPoint.Y - leapCursor.Height / 2);
-                leapCursor.SetValue(Canvas.LeftProperty, _currentCursorPoint.X - leapCursor.Width / 2);
+                if (_isCursorPositionTracked)
+                {
+                    _currentCursorPoint.X = cursorContainer.ActualWidth * position.x;
+                    _currentCursorPoint.Y = cursorContainer.ActualHeight * (1 - position.y);
+                    leapCursor.SetValue(Canvas.TopProperty, _currentCursorPoint.Y - leapCursor.Height / 2);
+                    leapCursor.SetValue(Canvas.LeftProperty, _currentCursorPoint.X - leapCursor.Width / 2);
+                }
 
                 if (_isDragging)
                 {
@@ -109,6 +129,99 @@ namespace LeapMotionExploration.Windows.Samples
 
         }
 
+        /**
+         * Rotation Selection
+         * 
+         * rotationSelectionEvent(LeapEvent leapEvent)
+         * colorSelectionEvent(LeapEvent leapEvent)
+         */
+
+        private void rotationSelectionEvent(LeapEvent leapEvent)
+        {
+            if (_hoveredShape.Equals(colorPicker))
+            {
+                colorSelectionEvent(leapEvent);
+            }
+        }
+
+        private void colorSelectionEvent(LeapEvent leapEvent)
+        {
+            switch (leapEvent.Type)
+            {
+                case LeapEvent.ROTATION_SELECTION_START:
+                    _isCursorPositionTracked = false;
+                    setColorMenuVisibility(Visibility.Visible);
+                    break;
+
+                case LeapEvent.ROTATION_SELECTION_NEXT:
+                    selectNextColor();
+                    break;
+
+                case LeapEvent.ROTATION_SELECTION_PREVIOUS:
+                    selectPreviousColor();
+                    break;
+
+                case LeapEvent.ROTATION_SELECTION_END:
+                    _isCursorPositionTracked = true;
+                    setColorMenuVisibility(Visibility.Hidden);
+                    break;
+            }
+        }   
+
+
+        /**
+         * Color Rotating Picker
+         * 
+         * selectColorItem(int i)
+         * selectNextColor()
+         * selectPreviousColor()
+         * updateCurrentColorSelection()
+         * setColorMenuVisibility(Visibility visibility)
+         */
+
+        private void selectColorItem(int i)
+        {
+            mnColorPicker.RenderTransform = new RotateTransform(90 - 45 * i);
+            foreach (TextBlock textBlock in _mnColorPickerItems)
+            {
+                textBlock.Opacity = 0.4;
+            }
+            _mnColorPickerItems[i].Opacity = 1;
+            colorPicker.Fill = _mnColorPickerItems[i].Background;
+        }
+
+        private void selectNextColor()
+        {
+            _currentColorPickerItemIndex = Math.Min(_mnColorPickerItems.Count(), _currentColorPickerItemIndex + 1);
+            updateCurrentColorSelection();
+        }
+
+        private void selectPreviousColor()
+        {
+            _currentColorPickerItemIndex = Math.Max(0, _currentColorPickerItemIndex - 1);
+            updateCurrentColorSelection();
+        }
+
+        private void updateCurrentColorSelection()
+        {
+            Application.Current.Dispatcher.Invoke(new Action(() =>
+            {
+                selectColorItem(_currentColorPickerItemIndex);
+            }));
+        }
+
+        private void setColorMenuVisibility(Visibility visibility)
+        {
+            Application.Current.Dispatcher.Invoke(new Action(() =>
+            {
+                mnColorPicker.Visibility = visibility;
+            }));
+        }
+
+
+        /**
+         * Hover & Drag
+         */
 
         private void updateHover(double posX, double posY)
         {
