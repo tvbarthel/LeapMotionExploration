@@ -15,6 +15,7 @@ using Leap;
 using MyLeap.Listener;
 using MyLeap.Utils;
 using MyLeap.Event;
+using LeapMotionExploration.Windows.Samples.Ui;
 
 namespace LeapMotionExploration.Windows.Samples
 {
@@ -30,7 +31,9 @@ namespace LeapMotionExploration.Windows.Samples
         private LeapListenerOneHandPosition CursorListener;
         private LeapListenerOneHandClose HandCloseListener;
 
+        //hovered
         private Shape _hoveredShape;
+        private DraggableHoveredAdorner _draggableHoveredAdorner;
 
         //drag motion
         private bool _isDragging;
@@ -127,6 +130,8 @@ namespace LeapMotionExploration.Windows.Samples
                 {
                     _hoveredShape.Opacity = 1;
                     _hoveredShape = null;
+                    AdornerLayer.GetAdornerLayer(_draggableHoveredAdorner.AdornedElement).Remove(_draggableHoveredAdorner);
+                    _draggableHoveredAdorner = null;
                 }));
             }
             
@@ -142,6 +147,9 @@ namespace LeapMotionExploration.Windows.Samples
                 Application.Current.Dispatcher.Invoke(new Action(() =>
                 {
                     _hoveredShape.Opacity = 0.5;
+                    _draggableHoveredAdorner = new DraggableHoveredAdorner(shape);
+                    AdornerLayer layer = AdornerLayer.GetAdornerLayer(shape);
+                    layer.Add(_draggableHoveredAdorner);
                 }));
             }           
         }
@@ -248,6 +256,7 @@ namespace LeapMotionExploration.Windows.Samples
                 {
                     Shapes.Remove(_hoveredShape);
                     cursorContainer.Children.Remove(_hoveredShape);
+                    _hoveredShape = null;
                 }
             }));
         }
