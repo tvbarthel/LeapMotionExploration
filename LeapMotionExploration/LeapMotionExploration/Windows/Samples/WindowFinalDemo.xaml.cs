@@ -56,7 +56,6 @@ namespace LeapMotionExploration.Windows.Samples
         private bool _isDragging;
         private Point _originalGraphicElementPoint;
         private Point _startCursorPoint;
-        private int _realZIndex;
 
         //basket
         private DeleteAdorner _deleteAdorner;
@@ -684,8 +683,6 @@ namespace LeapMotionExploration.Windows.Samples
                 Opacity = 0.8,
                 BlurRadius = 4
             };
-            _realZIndex = Canvas.GetZIndex(_hoveredGraphicElement);
-            Canvas.SetZIndex(_hoveredGraphicElement, 99);
         }
 
         private void UnsetDragginOverlay()
@@ -694,7 +691,6 @@ namespace LeapMotionExploration.Windows.Samples
             DoubleAnimation anim = new DoubleAnimation(1.2, 1, TimeSpan.FromMilliseconds(100));
             Zoom(_hoveredGraphicElement, anim);
             SetDraggableOverlay(_hoveredGraphicElement);
-            Canvas.SetZIndex(_hoveredGraphicElement, _realZIndex);
         }
 
 
