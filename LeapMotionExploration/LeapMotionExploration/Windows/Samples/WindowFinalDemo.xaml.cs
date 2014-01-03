@@ -19,6 +19,7 @@ using LeapMotionExploration.Windows.Samples.Converter;
 using LeapMotionExploration.Windows.Samples.Ui;
 using System.Windows.Media.Effects;
 using System.Windows.Media.Animation;
+using System.Timers;
 
 namespace LeapMotionExploration.Windows.Samples
 {
@@ -36,7 +37,7 @@ namespace LeapMotionExploration.Windows.Samples
 
         private const double SHAPE_CANDIDATE_LEFT_MARGIN = 180d;
         private const double SHAPE_CANDIDATE_MAX_SPAWN_DISTANCE = 200d;
-        
+
         private Controller _controller;
         //A list of the graphic elements present on the canvas.
         private List<FrameworkElement> _graphicElements;
@@ -71,6 +72,9 @@ namespace LeapMotionExploration.Windows.Samples
         private TextBlock[] _mnShapePickerItems;
         private int _currentShapePickerItemIndex;
 
+        //info place holder
+        private TextBlock _infoPlaceHolder;
+
         private MultiBinding _mbCanvasTop;
         private Shape _currentShapeCandidate;
         private Point _currentShapeCandidateSpawn;
@@ -102,14 +106,14 @@ namespace LeapMotionExploration.Windows.Samples
             _rotatingSelectionListener.OnStateChange += rotationSelectionEvent;
 
             _mnShapePickerItems = new TextBlock[] { mnShapePickerRectangle, mnShapePickerCircle, mnShapePickerEllipse };
-            _currentShapePickerItemIndex = 0;            
+            _currentShapePickerItemIndex = 0;
 
             _mnColorPickerItems = new TextBlock[] { mnColorPickerBlue, mnColorPickerPurple, mnColorPickerGreen, mnColorPickerOrange, mnColorPickerRed };
             _currentColorPickerItemIndex = 0;
 
             _graphicElements = new List<FrameworkElement>();
             _staticGraphicElements = new List<FrameworkElement>();
-            
+
             Rectangle rect1 = new Rectangle();
             rect1.Height = rect1.Width = 32;
             rect1.Fill = Brushes.Blue;
@@ -143,7 +147,7 @@ namespace LeapMotionExploration.Windows.Samples
             _staticGraphicElements.Add(shapePicker);
 
             selectShapeItem(_currentShapePickerItemIndex);
-            selectColorItem(_currentColorPickerItemIndex);       
+            selectColorItem(_currentColorPickerItemIndex);
         }
 
         private void OnPositionChange(LeapEvent leapEvent)
@@ -199,7 +203,7 @@ namespace LeapMotionExploration.Windows.Samples
                 _currentShapeCandidate = null;
             }
 
-            switch(_currentShapePickerItemIndex)
+            switch (_currentShapePickerItemIndex)
             {
                 case 0:
                     //Rectangle
@@ -508,7 +512,7 @@ namespace LeapMotionExploration.Windows.Samples
                 double graphicElementBottom = Canvas.GetBottom(graphicElement);
                 if (!double.IsNaN(graphicElementRight) && !double.IsNaN(graphicElementBottom))
                 {
-                    graphicElementTop = cursorContainer.ActualHeight - graphicElementBottom -graphicElement.ActualHeight;
+                    graphicElementTop = cursorContainer.ActualHeight - graphicElementBottom - graphicElement.ActualHeight;
                     graphicElementLeft = cursorContainer.ActualWidth - graphicElementRight - graphicElement.ActualWidth;
                     System.Diagnostics.Debug.WriteLine(graphicElementTop + " " + graphicElementLeft);
                 }
@@ -574,7 +578,7 @@ namespace LeapMotionExploration.Windows.Samples
                 SetDraggingOverlay();
 
                 //Save the current spawning point
-                if(_hoveredGraphicElement.Equals(_currentShapeCandidate))
+                if (_hoveredGraphicElement.Equals(_currentShapeCandidate))
                 {
                     _currentShapeCandidateSpawn = new Point(SHAPE_CANDIDATE_LEFT_MARGIN + _currentShapeCandidate.ActualWidth / 2, cursorContainer.ActualHeight / 2);
                 }
@@ -582,9 +586,9 @@ namespace LeapMotionExploration.Windows.Samples
 
         }
 
-        
 
-        
+
+
 
         private void DragMoved()
         {
@@ -614,8 +618,8 @@ namespace LeapMotionExploration.Windows.Samples
                 //If the current candidate shape is being dragged,
                 //Check if it went to far from the spawning point.
                 if (_hoveredGraphicElement.Equals(_currentShapeCandidate))
-                {                    
-                    double currentDistance = Math.Sqrt(Math.Pow(_currentShapeCandidateSpawn.X - (Canvas.GetLeft(_currentShapeCandidate) +  _currentShapeCandidate.ActualWidth / 2), 2) 
+                {
+                    double currentDistance = Math.Sqrt(Math.Pow(_currentShapeCandidateSpawn.X - (Canvas.GetLeft(_currentShapeCandidate) + _currentShapeCandidate.ActualWidth / 2), 2)
                         + Math.Pow(_currentShapeCandidateSpawn.Y - (Canvas.GetTop(_currentShapeCandidate) + _currentShapeCandidate.ActualHeight / 2), 2));
                     if (currentDistance > SHAPE_CANDIDATE_MAX_SPAWN_DISTANCE)
                     {
@@ -726,6 +730,7 @@ namespace LeapMotionExploration.Windows.Samples
                 AdornerLayer layer = AdornerLayer.GetAdornerLayer(_hoveredGraphicElement);
                 layer.Add(_deleteAdorner);
                 _hoveredGraphicElement.Opacity = 0.8;
+                DisplayInfo("Déposer la forme pour la supprimer définitivement.");
             }
         }
 
@@ -736,6 +741,7 @@ namespace LeapMotionExploration.Windows.Samples
                 AdornerLayer.GetAdornerLayer(_deleteAdorner.AdornedElement).Remove(_deleteAdorner);
                 _deleteAdorner = null;
                 _hoveredGraphicElement.Opacity = 1.0;
+                HideInfo();
 
             }
         }
@@ -745,11 +751,53 @@ namespace LeapMotionExploration.Windows.Samples
             ScaleTransform trans = new ScaleTransform();
             target.RenderTransformOrigin = new Point(0.5, 0.5);
             target.RenderTransform = trans;
-            // if you use the same animation for X & Y you don't need anim1, anim2 
             DoubleAnimation anim = animation;
             trans.BeginAnimation(ScaleTransform.ScaleXProperty, anim);
             trans.BeginAnimation(ScaleTransform.ScaleYProperty, anim);
 
+        }
+
+        /**
+         * Info place holder
+         */
+
+        private void CreateInfoPlaceholder()
+        {
+            _infoPlaceHolder = new TextBlock();
+            _infoPlaceHolder.Foreground = new SolidColorBrush(Colors.White);
+            _infoPlaceHolder.Background = new SolidColorBrush(Color.FromRgb(211, 211, 211));
+            _infoPlaceHolder.FontSize = 20;
+            _infoPlaceHolder.FontFamily = new FontFamily("Roboto");
+            Canvas.SetTop(_infoPlaceHolder, 0);
+            Canvas.SetRight(_infoPlaceHolder, 0);
+            cursorContainer.Children.Add(_infoPlaceHolder);
+        }
+
+        private void DisplayInfo(String info)
+        {
+            if (_infoPlaceHolder == null)
+            {
+                CreateInfoPlaceholder();
+            }
+            _infoPlaceHolder.Text = " " + info + " ";
+            DoubleAnimation show = new DoubleAnimation(-30, 0, TimeSpan.FromMilliseconds(500));
+            _infoPlaceHolder.BeginAnimation(Canvas.TopProperty, show);
+        }
+
+        private void HideInfo()
+        {
+            if (_infoPlaceHolder != null)
+            {
+                DoubleAnimation hide = new DoubleAnimation(0, -30, TimeSpan.FromMilliseconds(500));
+                hide.Completed += (s, args) =>
+                {
+                    cursorContainer.Children.Remove(_infoPlaceHolder);
+                    _infoPlaceHolder = null;
+                };
+
+                _infoPlaceHolder.BeginAnimation(Canvas.TopProperty, hide);
+
+            }
         }
 
     }
