@@ -29,14 +29,16 @@ namespace LeapMotionExploration.Windows.Samples
     public partial class WindowFinalDemo : Window
     {
 
-        private const int MIN_WIDTH = 75;
-        private const int MIN_HEIGHT = 75;
+        private const int MIN_WIDTH = 100;
+        private const int MIN_HEIGHT = 100;
 
         private const int DEFAULT_HEIGHT = 150;
         private const int DEFAULT_WIDTH = 150;
 
         private const double SHAPE_CANDIDATE_LEFT_MARGIN = 180d;
         private const double SHAPE_CANDIDATE_MAX_SPAWN_DISTANCE = 200d;
+
+        private const double DEFAULT_SIZE_DELTA = 2.5d;
 
         private Controller _controller;
         //A list of the graphic elements present on the canvas.
@@ -72,6 +74,9 @@ namespace LeapMotionExploration.Windows.Samples
         private TextBlock[] _mnShapePickerItems;
         private int _currentShapePickerItemIndex;
 
+        //Shape manipulation
+        private LeapListenerTwoHandManipulation _shapeManipulationListener;
+
         //info place holder
         private TextBlock _infoPlaceHolder;
 
@@ -104,6 +109,10 @@ namespace LeapMotionExploration.Windows.Samples
             _rotatingSelectionListener = new LeapListenerRotateSelection();
             _controller.AddListener(_rotatingSelectionListener);
             _rotatingSelectionListener.OnStateChange += rotationSelectionEvent;
+
+            _shapeManipulationListener = new LeapListenerTwoHandManipulation();
+            _controller.AddListener(_shapeManipulationListener);
+            _shapeManipulationListener.OnStateChange += this.OnShapeManipulationEvent;
 
             _mnShapePickerItems = new TextBlock[] { mnShapePickerRectangle, mnShapePickerCircle, mnShapePickerEllipse };
             _currentShapePickerItemIndex = 0;
@@ -239,6 +248,44 @@ namespace LeapMotionExploration.Windows.Samples
 
             }
 
+        }
+
+        /**
+         * Shape Manipulation
+         * 
+         * OnShapeManipulationEvent(LeapEvent leapEvent)
+         * invokeChangeUIElementSize(FrameworkElement uiElement, double widthDelta, double heightDelta)
+         * chageUIElementSize(FrameworkElement uiElement, double widthDelta, double heightDelta)
+         */
+        private void OnShapeManipulationEvent(LeapEvent leapEvent)
+        {
+            if (_hoveredGraphicElement != null && !_staticGraphicElements.Contains(_hoveredGraphicElement))
+            {
+                switch (leapEvent.Type)
+                {
+                    case LeapEvent.TRANSFORMATION_SIZE_UP:                        
+                        invokeChangeUIElementSize(_hoveredGraphicElement, DEFAULT_SIZE_DELTA, DEFAULT_SIZE_DELTA);
+                        break;
+
+                    case LeapEvent.TRANSFORMATION_SIZE_DOWN:
+                        invokeChangeUIElementSize(_hoveredGraphicElement, -DEFAULT_SIZE_DELTA, -DEFAULT_SIZE_DELTA);
+                        break;
+                }
+            }            
+        }
+
+        private void invokeChangeUIElementSize(FrameworkElement uiElement, double widthDelta, double heightDelta)
+        {
+            Application.Current.Dispatcher.Invoke(new Action(() =>
+            {
+                changeUIElementSize(uiElement, widthDelta, heightDelta);
+            }));
+        }
+
+        private void changeUIElementSize(FrameworkElement uiElement, double widthDelta, double heightDelta)
+        {            
+            uiElement.Width = Math.Max(MIN_WIDTH, uiElement.Width + widthDelta);
+            uiElement.Height = Math.Max(MIN_HEIGHT, uiElement.Height + heightDelta); 
         }
 
         /**
