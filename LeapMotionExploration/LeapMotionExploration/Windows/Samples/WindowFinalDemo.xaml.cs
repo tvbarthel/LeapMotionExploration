@@ -777,7 +777,7 @@ namespace LeapMotionExploration.Windows.Samples
                 AdornerLayer layer = AdornerLayer.GetAdornerLayer(_hoveredGraphicElement);
                 layer.Add(_deleteAdorner);
                 _hoveredGraphicElement.Opacity = 0.8;
-                DisplayInfo("Déposer la forme pour la supprimer définitivement.");
+                DisplayInfo("Déposez la forme pour la supprimer définitivement.");
             }
         }
 
