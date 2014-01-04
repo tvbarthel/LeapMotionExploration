@@ -4,15 +4,29 @@
         xmlns:localConverter="clr-namespace:LeapMotionExploration.Windows.Samples.Converter"
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
         Title="WindowDemo" Height="800" Width="1000">
-    <Canvas x:Name="cursorContainer" Background="#f9f9f9">
+    <Canvas x:Name="cursorContainer" Background="#e3e3e3">
         <Canvas.Resources>
             <localConverter:LeftMenuItemCanvasTopConverter x:Key="leftMenuItemPositionConverter" />
         </Canvas.Resources>
         
         <!-- Left Menu -->
-        
+
+        <Ellipse x:Name="menuBackground" Width="520" Height="520" Fill="#c3c3c3" Canvas.Left="-245" >
+            <Canvas.Top>
+                <MultiBinding Converter="{StaticResource leftMenuItemPositionConverter}">
+                    <Binding ElementName="cursorContainer" Path="ActualHeight"/>
+                    <Binding ElementName="menuBackground" Path="ActualHeight" />
+                    <Binding>
+                        <Binding.Source>
+                            <sys:Double>0</sys:Double>
+                        </Binding.Source>
+                    </Binding>
+                </MultiBinding>
+            </Canvas.Top>
+        </Ellipse>
+
         <!-- Color Picker Item -->
-        <Rectangle x:Name="colorPickerBackground" Width="120" Height="120" Fill="#d3d3d3" Canvas.Left="40" >
+        <Rectangle x:Name="colorPickerBackground" Width="120" Height="120" Fill="#e3e3e3" Canvas.Left="40" >
             <Canvas.Top>
                 <MultiBinding Converter="{StaticResource leftMenuItemPositionConverter}">
                     <Binding ElementName="cursorContainer" Path="ActualHeight"/>
@@ -105,7 +119,7 @@
         </Grid>
        
         <!-- Shape Picker Item -->
-        <Rectangle x:Name="shapePickerBackground" Width="120" Height="120" Fill="#d3d3d3" Canvas.Left="40" >
+        <Rectangle x:Name="shapePickerBackground" Width="120" Height="120" Fill="#e3e3e3" Canvas.Left="40" >
             <Canvas.Top>
                 <MultiBinding Converter="{StaticResource leftMenuItemPositionConverter}">
                     <Binding ElementName="cursorContainer" Path="ActualHeight"/>
