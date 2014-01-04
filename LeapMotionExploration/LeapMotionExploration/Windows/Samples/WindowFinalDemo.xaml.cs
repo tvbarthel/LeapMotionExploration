@@ -20,6 +20,7 @@ using LeapMotionExploration.Windows.Samples.Ui;
 using System.Windows.Media.Effects;
 using System.Windows.Media.Animation;
 using System.Timers;
+using System.IO;
 
 namespace LeapMotionExploration.Windows.Samples
 {
@@ -39,6 +40,8 @@ namespace LeapMotionExploration.Windows.Samples
         private const double SHAPE_CANDIDATE_MAX_SPAWN_DISTANCE = 200d;
 
         private const double DEFAULT_SIZE_DELTA = 2.5d;
+
+        private const String SCREENSHOT_FILE_NAME_FORMAT = "leap_motion_exploration_{0:dd_MM_yyyy_HH_mm_ss}.png";
 
         private Controller _controller;
         //A list of the graphic elements present on the canvas.
@@ -77,6 +80,9 @@ namespace LeapMotionExploration.Windows.Samples
         //Shape manipulation
         private LeapListenerTwoHandManipulation _shapeManipulationListener;
 
+        //Snapshot saver
+        private LeapListenerClap _snapshotSaverListener;
+
         //info place holder
         private TextBlock _infoPlaceHolder;
 
@@ -113,6 +119,12 @@ namespace LeapMotionExploration.Windows.Samples
             _shapeManipulationListener = new LeapListenerTwoHandManipulation();
             _controller.AddListener(_shapeManipulationListener);
             _shapeManipulationListener.OnStateChange += this.OnShapeManipulationEvent;
+
+            _snapshotSaverListener = new LeapListenerClap();
+            _controller.AddListener(_snapshotSaverListener);
+            _snapshotSaverListener.OnClapDetected += this.OnSnapshotSaveEvent;
+            //TODO check if OnStateChange != null before invoking an action.
+            _snapshotSaverListener.OnStateChange += new Action<string>((string s) => { });
 
             _mnShapePickerItems = new TextBlock[] { mnShapePickerRectangle, mnShapePickerCircle, mnShapePickerEllipse };
             _currentShapePickerItemIndex = 0;
@@ -248,6 +260,35 @@ namespace LeapMotionExploration.Windows.Samples
 
             }
 
+        }
+
+        /**
+         * Snapshot Saver
+         * 
+         * OnSnapshotSaveEvent(LeapEvent leapEvent)
+         * CanvasSnapshopt(Canvas canvas)
+         */
+
+        private void OnSnapshotSaveEvent(LeapEvent leapEvent)
+        {
+            Application.Current.Dispatcher.Invoke(new Action(() =>
+            {
+                CanvasSnapshot(cursorContainer);
+            }));
+        }
+
+        private void CanvasSnapshot(Canvas canvas)
+        {
+            RenderTargetBitmap targetBitmap = new RenderTargetBitmap((int)canvas.ActualWidth, (int)canvas.ActualHeight, 96d, 96d, PixelFormats.Default);
+            targetBitmap.Render(canvas);
+
+            PngBitmapEncoder encoder = new PngBitmapEncoder();
+            encoder.Frames.Add(BitmapFrame.Create(targetBitmap));
+
+            using (FileStream file = File.Open(String.Format(SCREENSHOT_FILE_NAME_FORMAT, DateTime.Now), FileMode.OpenOrCreate))
+            {
+                encoder.Save(file);
+            }
         }
 
         /**
