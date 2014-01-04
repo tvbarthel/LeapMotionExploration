@@ -551,20 +551,21 @@ namespace LeapMotionExploration.Windows.Samples
 
         private Boolean isCursorOnGraphicElement(FrameworkElement graphicElement, double posX, double posY)
         {
+            //Look for a top reference
             double graphicElementTop = Canvas.GetTop(graphicElement);
-            double graphicElementLeft = Canvas.GetLeft(graphicElement);
-            if (double.IsNaN(graphicElementTop) || double.IsNaN(graphicElementLeft))
+            if (double.IsNaN(graphicElementTop))
             {
-                double graphicElementRight = Canvas.GetRight(graphicElement);
-                double graphicElementBottom = Canvas.GetBottom(graphicElement);
-                if (!double.IsNaN(graphicElementRight) && !double.IsNaN(graphicElementBottom))
-                {
-                    graphicElementTop = cursorContainer.ActualHeight - graphicElementBottom - graphicElement.ActualHeight;
-                    graphicElementLeft = cursorContainer.ActualWidth - graphicElementRight - graphicElement.ActualWidth;
-                    System.Diagnostics.Debug.WriteLine(graphicElementTop + " " + graphicElementLeft);
-                }
+                graphicElementTop = cursorContainer.ActualHeight - Canvas.GetBottom(graphicElement) - graphicElement.ActualHeight;
             }
-            return (posX > graphicElementLeft && posX < (graphicElementLeft + graphicElement.ActualWidth) && posY > graphicElementTop && posY < (graphicElementTop + graphicElement.ActualHeight)); ;
+
+            //Look for a left reference
+            double graphicElementLeft = Canvas.GetLeft(graphicElement);
+            if (double.IsNaN(graphicElementLeft))
+            {
+                graphicElementLeft = cursorContainer.ActualWidth - Canvas.GetRight(graphicElement) - graphicElement.ActualWidth;
+            }
+
+            return !double.IsNaN(graphicElementLeft) && !double.IsNaN(graphicElementLeft) && posX > graphicElementLeft && posX < (graphicElementLeft + graphicElement.ActualWidth) && posY > graphicElementTop && posY < (graphicElementTop + graphicElement.ActualHeight);
         }
 
         protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
