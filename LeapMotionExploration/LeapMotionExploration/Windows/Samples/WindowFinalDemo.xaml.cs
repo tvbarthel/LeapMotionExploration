@@ -137,14 +137,6 @@ namespace LeapMotionExploration.Windows.Samples
             _graphicElements = new List<FrameworkElement>();
             _staticGraphicElements = new List<FrameworkElement>();
 
-            Rectangle rect1 = new Rectangle();
-            rect1.Height = rect1.Width = 32;
-            rect1.Fill = Brushes.Blue;
-            Canvas.SetTop(rect1, 100);
-            Canvas.SetLeft(rect1, 100);
-
-            cursorContainer.Children.Add(rect1);
-
             _mbCanvasTop = new MultiBinding();
             _mbCanvasTop.Converter = new LeftMenuItemCanvasTopConverter();
 
@@ -164,7 +156,6 @@ namespace LeapMotionExploration.Windows.Samples
 
             _graphicElements.Add(colorPicker);
             _graphicElements.Add(shapePicker);
-            _graphicElements.Add(rect1);
 
             _staticGraphicElements.Add(colorPicker);
             _staticGraphicElements.Add(shapePicker);
