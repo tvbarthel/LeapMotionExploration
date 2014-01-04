@@ -811,10 +811,17 @@ namespace LeapMotionExploration.Windows.Samples
         private void CreateInfoPlaceholder()
         {
             _infoPlaceHolder = new TextBlock();
-            _infoPlaceHolder.Foreground = new SolidColorBrush(Colors.White);
+            _infoPlaceHolder.Foreground = new SolidColorBrush(Colors.Black);
             _infoPlaceHolder.Background = new SolidColorBrush(Color.FromRgb(211, 211, 211));
             _infoPlaceHolder.FontSize = 20;
             _infoPlaceHolder.FontFamily = new FontFamily("Roboto");
+            _infoPlaceHolder.Padding = new Thickness(10);
+            _infoPlaceHolder.TextAlignment = TextAlignment.Center;
+
+            Binding widthBinding = new Binding("ActualWidth");
+            widthBinding.Source = cursorContainer;
+            _infoPlaceHolder.SetBinding(TextBlock.WidthProperty, widthBinding);
+
             Canvas.SetTop(_infoPlaceHolder, 0);
             Canvas.SetRight(_infoPlaceHolder, 0);
             cursorContainer.Children.Add(_infoPlaceHolder);
