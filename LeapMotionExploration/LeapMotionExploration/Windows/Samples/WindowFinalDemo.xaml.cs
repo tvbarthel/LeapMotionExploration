@@ -82,6 +82,7 @@ namespace LeapMotionExploration.Windows.Samples
 
         //Snapshot saver
         private LeapListenerClap _snapshotSaverListener;
+        private Boolean _isTakingSnapshot;
 
         //info place holder
         private TextBlock _infoPlaceHolder;
@@ -125,6 +126,7 @@ namespace LeapMotionExploration.Windows.Samples
             _snapshotSaverListener.OnClapDetected += this.OnSnapshotSaveEvent;
             //TODO check if OnStateChange != null before invoking an action.
             _snapshotSaverListener.OnStateChange += new Action<string>((string s) => { });
+            _isTakingSnapshot = false;
 
             _mnShapePickerItems = new TextBlock[] { mnShapePickerRectangle, mnShapePickerCircle, mnShapePickerEllipse };
             _currentShapePickerItemIndex = 0;
@@ -266,29 +268,90 @@ namespace LeapMotionExploration.Windows.Samples
          * Snapshot Saver
          * 
          * OnSnapshotSaveEvent(LeapEvent leapEvent)
-         * CanvasSnapshopt(Canvas canvas)
+         * TakeSnapshot(Canvas canvas)
+         * MakeSnapshotEffect(Canvas canvas, BitmapSource snapshotSource)
          */
-
         private void OnSnapshotSaveEvent(LeapEvent leapEvent)
         {
-            Application.Current.Dispatcher.Invoke(new Action(() =>
+            if (!_isTakingSnapshot)
             {
-                CanvasSnapshot(cursorContainer);
-            }));
+                Application.Current.Dispatcher.Invoke(new Action(() =>
+                {
+                    BitmapSource snapshotSource = TakeSnapshot(cursorContainer);
+                    MakeSnapshotEffect(cursorContainer, snapshotSource);
+
+                }));
+            }
+            
         }
 
-        private void CanvasSnapshot(Canvas canvas)
+        private BitmapSource TakeSnapshot(Canvas canvas)
         {
+            _isTakingSnapshot = true;
             RenderTargetBitmap targetBitmap = new RenderTargetBitmap((int)canvas.ActualWidth, (int)canvas.ActualHeight, 96d, 96d, PixelFormats.Default);
-            targetBitmap.Render(canvas);
+            targetBitmap.Render(canvas);            
 
             PngBitmapEncoder encoder = new PngBitmapEncoder();
-            encoder.Frames.Add(BitmapFrame.Create(targetBitmap));
+            encoder.Frames.Add(BitmapFrame.Create(targetBitmap));           
 
             using (FileStream file = File.Open(String.Format(SCREENSHOT_FILE_NAME_FORMAT, DateTime.Now), FileMode.OpenOrCreate))
             {
                 encoder.Save(file);
             }
+
+            return targetBitmap;
+        }
+
+        private void MakeSnapshotEffect(Canvas canvas, BitmapSource snapshotSource)
+        {
+            Border snapshotPreview = new Border();
+            snapshotPreview.RenderTransform = new ScaleTransform(1, 1, 0.5, 0.5);
+            snapshotPreview.RenderTransformOrigin = new Point(0.5, 0.5);
+            snapshotPreview.Child = new Image() { Source = snapshotSource };
+            snapshotPreview.Background = new SolidColorBrush(Colors.DarkGray);
+            snapshotPreview.SetBinding(Border.WidthProperty, new Binding("ActualWidth") { Source = canvas });
+            snapshotPreview.SetBinding(Border.HeightProperty, new Binding("ActualHeight") { Source = canvas });            
+            snapshotPreview.Padding = new Thickness(5,10,5,10);
+            Canvas.SetZIndex(snapshotPreview, int.MaxValue);
+            canvas.Children.Add(snapshotPreview);            
+
+            Storyboard snapshotStoryboard = new Storyboard();
+            snapshotStoryboard.Completed += delegate { canvas.Children.Remove(snapshotPreview); _isTakingSnapshot = false; };            
+
+            //Fade Out
+            DoubleAnimation fadeOutAnimation = new DoubleAnimation() {
+                From = 1,
+                To = 0,
+                BeginTime = TimeSpan.FromSeconds(1.1),
+                Duration = new Duration(TimeSpan.FromSeconds(0.8))
+            };
+            snapshotStoryboard.Children.Add(fadeOutAnimation);
+            Storyboard.SetTarget(fadeOutAnimation, snapshotPreview);
+            Storyboard.SetTargetProperty(fadeOutAnimation, new PropertyPath(Border.OpacityProperty));
+
+            //Scale X Down
+            DoubleAnimation scaleXDownAnimation = new DoubleAnimation()
+            {
+                From = 1,
+                To = 0.75,
+                Duration = new Duration(TimeSpan.FromSeconds(0.2))
+            };
+            snapshotStoryboard.Children.Add(scaleXDownAnimation);
+            Storyboard.SetTarget(scaleXDownAnimation, snapshotPreview);
+            Storyboard.SetTargetProperty(scaleXDownAnimation, new PropertyPath("RenderTransform.ScaleX"));
+            
+            //Scale Y Down
+            DoubleAnimation scaleYDownAnimation = new DoubleAnimation()
+            {
+                From = 1,
+                To = 0.75,
+                Duration = new Duration(TimeSpan.FromSeconds(0.2))
+            };
+            snapshotStoryboard.Children.Add(scaleYDownAnimation);
+            Storyboard.SetTarget(scaleYDownAnimation, snapshotPreview);
+            Storyboard.SetTargetProperty(scaleYDownAnimation, new PropertyPath("RenderTransform.ScaleY"));
+
+            snapshotStoryboard.Begin(this);
         }
 
         /**
