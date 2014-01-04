@@ -193,8 +193,8 @@
         </Grid>
 
 
-        <Rectangle Name="basket" Stroke="Black" StrokeThickness="2" Height="150" Width="150"  Canvas.Right="0" Canvas.Bottom="0" Fill="#33000000" ClipToBounds="True"/>
-        
+        <Rectangle Name="basket" Height="100" Width="175"  Canvas.Right="0" Canvas.Bottom="0" Fill="#c3c3c3" ClipToBounds="True"/>
+
         <!-- Leap Cursor-->
         <Ellipse x:Name="leapCursor" Panel.ZIndex="999999" Stroke="Black" StrokeThickness="2" Height="15" Width="15" Fill="#33000000" ClipToBounds="True"/>
     </Canvas>
