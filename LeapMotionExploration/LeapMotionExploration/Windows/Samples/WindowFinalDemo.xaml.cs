@@ -124,8 +124,6 @@ namespace LeapMotionExploration.Windows.Samples
             _snapshotSaverListener = new LeapListenerClap();
             _controller.AddListener(_snapshotSaverListener);
             _snapshotSaverListener.OnClapDetected += this.OnSnapshotSaveEvent;
-            //TODO check if OnStateChange != null before invoking an action.
-            _snapshotSaverListener.OnStateChange += new Action<string>((string s) => { });
             _isTakingSnapshot = false;
 
             _mnShapePickerItems = new TextBlock[] { mnShapePickerRectangle, mnShapePickerCircle, mnShapePickerEllipse };

@@ -74,7 +74,7 @@ namespace MyLeap.Listener
                     mIsClappedIn = true;
                     System.Diagnostics.Debug.WriteLine("CLAP IN");
                     Leap.Vector eventPosition = (mRightHand.PalmPosition.Normalized + mLeftHand.PalmPosition.Normalized) / 2;
-                    Task.Factory.StartNew(() => OnClapDetected(new LeapEvent(eventPosition)));
+                    FireClapDetected(eventPosition);
                 }
 
                 //Clap out condition
@@ -93,7 +93,7 @@ namespace MyLeap.Listener
                     case STEP_0:
                         //initial state
                         mCurrentStep = STEP_1_TWO_HANDS;
-                        fireStateChange("STEP_1_TWO_HANDS");
+                        FireStateChange("STEP_1_TWO_HANDS");
                         break;
                     case STEP_1_TWO_HANDS:
                         //two hands are in the frame
@@ -104,7 +104,7 @@ namespace MyLeap.Listener
                             mLeftDotProduct < BOUNDARIES_DOT_PRODUCT_IN)
                         {
                             mCurrentStep = STEP_2_PALMS_COLLINEAR;
-                            fireStateChange("STEP_2_PALMS_COLLINEAR");
+                            FireStateChange("STEP_2_PALMS_COLLINEAR");
                         }
                         break;
                     case STEP_2_PALMS_COLLINEAR:
@@ -115,7 +115,7 @@ namespace MyLeap.Listener
                             mLeftDotProduct > BOUNDARIES_DOT_PRODUCT_OUT)
                         {
                             mCurrentStep = STEP_1_TWO_HANDS;
-                            fireStateChange("STEP_1_TWO_HANDS");
+                            FireStateChange("STEP_1_TWO_HANDS");
                         }
                         else
                         {
@@ -123,7 +123,7 @@ namespace MyLeap.Listener
                                 RightHandCenterInLeftHandPlan() <= BOUNDARIES_DOT_PRODUCT_IN)
                             {
                                 mCurrentStep = STEP_3_PALMS_ALIGNED;
-                                fireStateChange("STEP_3_PALMS_ALIGNED");
+                                FireStateChange("STEP_3_PALMS_ALIGNED");
                             }
                         }
                         break;
@@ -133,7 +133,7 @@ namespace MyLeap.Listener
                             RightHandCenterInLeftHandPlan() > BOUNDARIES_PALM_ALIGNED)
                         {
                             mCurrentStep = STEP_2_PALMS_COLLINEAR;
-                            fireStateChange("STEP_2_PALMS_COLLINEAR");
+                            FireStateChange("STEP_2_PALMS_COLLINEAR");
                         }
                         else
                         {
@@ -141,7 +141,7 @@ namespace MyLeap.Listener
                             if (mHandsDist <= BOUNDARIES_PALM_CLOSED)
                             {
                                 mCurrentStep = STEP_4_HANDS_CLOSE;
-                                fireStateChange("STEP_4_HANDS_CLOSE");
+                                FireStateChange("STEP_4_HANDS_CLOSE");
                             }
                         }
 
@@ -155,17 +155,28 @@ namespace MyLeap.Listener
                 if (mCurrentStep != STEP_0)
                 {
                     mCurrentStep = STEP_0;
-                    fireStateChange("STEP_0");
+                    FireStateChange("STEP_0");
                 }
             }
         }
 
-        private void fireStateChange(String state)
+        private void FireClapDetected(Leap.Vector eventPosition)
         {
-            Application.Current.Dispatcher.Invoke(new Action(() =>
+            if (OnClapDetected != null)
             {
-                Task.Factory.StartNew(() => OnStateChange(state));
-            }));
+                Task.Factory.StartNew(() => OnClapDetected(new LeapEvent(eventPosition)));
+            }
+        }
+
+        private void FireStateChange(String state)
+        {
+            if (OnStateChange != null)
+            {
+                Application.Current.Dispatcher.Invoke(new Action(() =>
+                {
+                    Task.Factory.StartNew(() => OnStateChange(state));
+                }));
+            }
         }
 
         private Double RightHandCenterInLeftHandPlan()
