@@ -130,7 +130,7 @@ namespace LeapMotionExploration.Windows.Samples
             _snapshotSaverListener.OnClapDetected += this.OnSnapshotSaveEvent;
             _isTakingSnapshot = false;
 
-            _mnShapePickerItems = new TextBlock[] { mnShapePickerRectangle, mnShapePickerCircle, mnShapePickerEllipse };
+            _mnShapePickerItems = new TextBlock[] { mnShapePickerRectangle, mnShapePickerCircle, mnShapePickerEllipse, mnShapePickerTriangle };
             _currentShapePickerItemIndex = 0;
 
             _mnColorPickerItems = new TextBlock[] { mnColorPickerBlue, mnColorPickerPurple, mnColorPickerGreen, mnColorPickerOrange, mnColorPickerRed };
@@ -311,6 +311,13 @@ namespace LeapMotionExploration.Windows.Samples
                     _currentShapeCandidate = new Ellipse();
                     _currentShapeCandidate.Width = DEFAULT_WIDTH;
                     _currentShapeCandidate.Height = Math.Max(DEFAULT_HEIGHT / 2, MIN_HEIGHT);
+                    break;
+
+                case 3:
+                    //Triangle
+                    _currentShapeCandidate = CreateTriangle();
+                    _currentShapeCandidate.Width = DEFAULT_WIDTH;
+                    _currentShapeCandidate.Height = DEFAULT_HEIGHT;
                     break;
             }
 
@@ -612,6 +619,13 @@ namespace LeapMotionExploration.Windows.Samples
                     newShape.Height = 50;
                     break;
 
+                case 3:
+                    //Triangle
+                    newShape = CreateTriangle();
+                    newShape.Width = 100;
+                    newShape.Height = 100;
+                    break;
+
             }
 
             if (newShape != null)
@@ -643,6 +657,18 @@ namespace LeapMotionExploration.Windows.Samples
             {
                 selectShapeItem(_currentShapePickerItemIndex);
             }));
+        }
+
+        private Shape CreateTriangle()
+        {
+            Polygon triangle = new Polygon();
+            PointCollection trianglePoints = new PointCollection();
+            trianglePoints.Add(new Point(1, 1));
+            trianglePoints.Add(new Point(0, 2));
+            trianglePoints.Add(new Point(2, 2));
+            triangle.Points = trianglePoints;
+            triangle.Stretch = Stretch.Fill;
+            return triangle;
         }
 
         /**
