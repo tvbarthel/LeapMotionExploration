@@ -117,7 +117,7 @@ namespace LeapMotionExploration.Windows.Samples
             _controller.AddListener(_handCloseListener);
             _handCloseListener.OnHandStateChange += this.OnHandClosed;
 
-            _rotatingSelectionListener = new LeapListenerRotateSelection();
+            _rotatingSelectionListener = new LeapListenerRotateSelection(_mainHand);
             _controller.AddListener(_rotatingSelectionListener);
             _rotatingSelectionListener.OnStateChange += rotationSelectionEvent;
 
