@@ -99,7 +99,7 @@ namespace LeapMotionExploration.Windows.Samples
         {
             InitializeComponent();
 
-            initMainHand(LeapUtils.LEFT_MOST_HAND);
+            initMainHand(LeapUtils.RIGHT_MOST_HAND);
 
             _isDragging = false;
             _currentCursorPoint = new Point(0, 0);
