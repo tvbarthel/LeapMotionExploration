@@ -8,7 +8,7 @@
         <Canvas.Resources>
             <localConverter:LeftMenuItemCanvasTopConverter x:Key="leftMenuItemPositionConverter" />
         </Canvas.Resources>
-        
+
         <!-- Left Menu -->
 
         <Ellipse x:Name="menuBackground" Width="520" Height="520" Fill="#c3c3c3" Canvas.Left="-245" >
@@ -50,10 +50,10 @@
                             <sys:Double>-115</sys:Double>
                         </Binding.Source>
                     </Binding>
-                </MultiBinding>                
+                </MultiBinding>
             </Canvas.Top>
         </Rectangle>
-        
+
         <!-- Color Picker Rotating Menu -->
         <Grid x:Name="mnColorPicker" Width="80" Panel.ZIndex="9000" Canvas.Left="200" RenderTransformOrigin="-1,0.5" Visibility="Hidden">
             <Grid.RenderTransform>
@@ -117,7 +117,7 @@
                 </TextBlock.RenderTransform>
             </TextBlock>
         </Grid>
-       
+
         <!-- Shape Picker Item -->
         <Rectangle x:Name="shapePickerBackground" Width="120" Height="120" Fill="#e3e3e3" Canvas.Left="40" >
             <Canvas.Top>
@@ -144,8 +144,8 @@
                         </Binding.Source>
                     </Binding>
                 </MultiBinding>
-            </Canvas.Top>         
-                     
+            </Canvas.Top>
+
         </Grid>
 
         <!-- Shape Picker Rotating Menu -->
@@ -203,7 +203,8 @@
         </Grid>
 
 
-        <Rectangle Name="basket" Height="100" Width="175"  Canvas.Right="0" Canvas.Bottom="0" Fill="#c3c3c3" ClipToBounds="True"/>
+        <Ellipse Name="basket" Height="200" Width="200"  Canvas.Right="-100" Canvas.Bottom="-100" Fill="#c3c3c3" ClipToBounds="True"/>
+        <Image Source="pack://application:,,,/Windows/Samples/Images/content_discard.png" Canvas.Bottom="0" Canvas.Right="0"/>
 
         <!-- Leap Cursor-->
         <Ellipse x:Name="leapCursor" Panel.ZIndex="999999" Stroke="Black" StrokeThickness="2" Height="15" Width="15" Fill="#33000000" ClipToBounds="True"/>
