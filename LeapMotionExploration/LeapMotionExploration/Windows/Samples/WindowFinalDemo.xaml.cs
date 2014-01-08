@@ -281,12 +281,14 @@ namespace LeapMotionExploration.Windows.Samples
             targetBitmap.Render(canvas);            
 
             PngBitmapEncoder encoder = new PngBitmapEncoder();
-            encoder.Frames.Add(BitmapFrame.Create(targetBitmap));           
+            encoder.Frames.Add(BitmapFrame.Create(targetBitmap));
 
-            using (FileStream file = File.Open(String.Format(SCREENSHOT_FILE_NAME_FORMAT, DateTime.Now), FileMode.OpenOrCreate))
+            FileStream file = File.Open(String.Format(SCREENSHOT_FILE_NAME_FORMAT, DateTime.Now), FileMode.OpenOrCreate);
+            using (file)
             {
                 encoder.Save(file);
             }
+            PopInfo("Screenshot enregistré sous : " + file.Name);
 
             return targetBitmap;
         }
@@ -305,7 +307,7 @@ namespace LeapMotionExploration.Windows.Samples
             canvas.Children.Add(snapshotPreview);            
 
             Storyboard snapshotStoryboard = new Storyboard();
-            snapshotStoryboard.Completed += delegate { canvas.Children.Remove(snapshotPreview); _isTakingSnapshot = false; };            
+            snapshotStoryboard.Completed += delegate { canvas.Children.Remove(snapshotPreview); _isTakingSnapshot = false;};            
 
             //Fade Out
             DoubleAnimation fadeOutAnimation = new DoubleAnimation() {
@@ -902,6 +904,9 @@ namespace LeapMotionExploration.Windows.Samples
          * Info place holder
          */
 
+        /**
+         * Create a TextBlock for the Info placeholder
+         */ 
         private void CreateInfoPlaceholder()
         {
             _infoPlaceHolder = new TextBlock();
@@ -911,6 +916,7 @@ namespace LeapMotionExploration.Windows.Samples
             _infoPlaceHolder.FontFamily = new FontFamily("Roboto");
             _infoPlaceHolder.Padding = new Thickness(10);
             _infoPlaceHolder.TextAlignment = TextAlignment.Center;
+            _infoPlaceHolder.TextWrapping = TextWrapping.Wrap;
 
             Binding widthBinding = new Binding("ActualWidth");
             widthBinding.Source = cursorContainer;
@@ -921,6 +927,27 @@ namespace LeapMotionExploration.Windows.Samples
             cursorContainer.Children.Add(_infoPlaceHolder);
         }
 
+        /**
+         * Pop some text and hide it after a while
+         */  
+        private void PopInfo(String info)
+        {
+
+            DisplayInfo(info);
+            DoubleAnimation fadeOut = new DoubleAnimation()
+            {
+                From = 1,
+                To = 0.75,
+                BeginTime = TimeSpan.FromSeconds(2),
+                Duration = new Duration(TimeSpan.FromMilliseconds(500))
+            };
+            fadeOut.Completed += delegate { HideInfo(); };
+            _infoPlaceHolder.BeginAnimation(TextBlock.OpacityProperty, fadeOut);           
+        }
+
+        /**
+         * Display some text, don't forget to call HideInfo when needed
+         */ 
         private void DisplayInfo(String info)
         {
             if (_infoPlaceHolder == null)
@@ -928,24 +955,35 @@ namespace LeapMotionExploration.Windows.Samples
                 CreateInfoPlaceholder();
             }
             _infoPlaceHolder.Text = " " + info + " ";
-            DoubleAnimation show = new DoubleAnimation(-30, 0, TimeSpan.FromMilliseconds(500));
-            _infoPlaceHolder.BeginAnimation(Canvas.TopProperty, show);
+            _infoPlaceHolder.BeginAnimation(Canvas.TopProperty, CreateVerticalSlideAnimation(-30,0));
         }
 
+        /**
+         * Hide info placeholder
+         */ 
         private void HideInfo()
         {
             if (_infoPlaceHolder != null)
             {
-                DoubleAnimation hide = new DoubleAnimation(0, -30, TimeSpan.FromMilliseconds(500));
+                DoubleAnimation hide = CreateVerticalSlideAnimation(0, -60);
                 hide.Completed += (s, args) =>
                 {
                     cursorContainer.Children.Remove(_infoPlaceHolder);
                     _infoPlaceHolder = null;
                 };
-
                 _infoPlaceHolder.BeginAnimation(Canvas.TopProperty, hide);
 
             }
+        }
+
+        private DoubleAnimation CreateVerticalSlideAnimation(double from, double to)
+        {
+            return new DoubleAnimation()
+            {
+                From = from,
+                To = to,
+                Duration = new Duration(TimeSpan.FromMilliseconds(500))
+            };
         }
 
     }
