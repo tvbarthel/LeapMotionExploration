@@ -43,6 +43,8 @@ namespace LeapMotionExploration.Windows.Samples
 
         private const String SCREENSHOT_FILE_NAME_FORMAT = "leap_motion_exploration_{0:dd_MM_yyyy_HH_mm_ss}.png";
 
+        private int _mainHand;
+
         private Controller _controller;
         //A list of the graphic elements present on the canvas.
         private List<FrameworkElement> _graphicElements;
@@ -97,6 +99,8 @@ namespace LeapMotionExploration.Windows.Samples
         {
             InitializeComponent();
 
+            initMainHand(LeapUtils.LEFT_MOST_HAND);
+
             _isDragging = false;
             _currentCursorPoint = new Point(0, 0);
             _originalGraphicElementPoint = new Point(0, 0);
@@ -104,12 +108,12 @@ namespace LeapMotionExploration.Windows.Samples
 
             _controller = new Controller();
 
-            _cursorListener = new LeapListenerOneHandPosition(LeapUtils.LEFT_MOST_HAND);
+            _cursorListener = new LeapListenerOneHandPosition(_mainHand);
             _isCursorPositionTracked = true;
             _controller.AddListener(_cursorListener);
             _cursorListener.OnStateChange += this.OnPositionChange;
 
-            _handCloseListener = new LeapListenerOneHandClose(LeapUtils.LEFT_MOST_HAND);
+            _handCloseListener = new LeapListenerOneHandClose(_mainHand);
             _controller.AddListener(_handCloseListener);
             _handCloseListener.OnHandStateChange += this.OnHandClosed;
 
@@ -160,6 +164,77 @@ namespace LeapMotionExploration.Windows.Samples
 
             selectShapeItem(_currentShapePickerItemIndex);
             selectColorItem(_currentColorPickerItemIndex);
+        }
+
+        private void initMainHand(int mainHand)
+        {
+            _mainHand = mainHand;
+            adaptUIToMainHand();
+        }
+
+        private void setMainHand(int mainHand)
+        {
+            if (!mainHand.Equals(_mainHand))
+            {
+                _mainHand = mainHand;
+                adaptUIToMainHand();
+            }
+            
+        }
+
+        private void adaptUIToMainHand()
+        {
+            DependencyProperty canvasPropertyToClean = Canvas.RightProperty;
+            DependencyProperty canvasPropertyToSet = Canvas.LeftProperty;
+            Point renderTransformOriginForChildren = new Point(-0.8, 0.5);
+            Point renderTransformOriginForParent = new Point(-1, 0.5);
+
+            if (_mainHand.Equals(LeapUtils.RIGHT_MOST_HAND))
+            {
+                canvasPropertyToClean = Canvas.LeftProperty;
+                canvasPropertyToSet = Canvas.RightProperty;
+
+                renderTransformOriginForChildren.X += 3;
+                renderTransformOriginForParent.X += 3;
+            }
+
+            colorPickerBackground.ClearValue(canvasPropertyToClean);
+            colorPickerBackground.SetValue(canvasPropertyToSet, 40d);
+
+            colorPicker.ClearValue(canvasPropertyToClean);
+            colorPicker.SetValue(canvasPropertyToSet, 50d);
+
+            shapePickerBackground.ClearValue(canvasPropertyToClean);
+            shapePickerBackground.SetValue(canvasPropertyToSet, 40d);
+
+            shapePicker.ClearValue(canvasPropertyToClean);
+            shapePicker.SetValue(canvasPropertyToSet, 50d);
+
+            menuBackground.ClearValue(canvasPropertyToClean);
+            menuBackground.SetValue(canvasPropertyToSet, -245d);
+
+            mnColorPicker.ClearValue(canvasPropertyToClean);
+            mnColorPicker.SetValue(canvasPropertyToSet, 200d);
+
+            mnShapePicker.ClearValue(canvasPropertyToClean);
+            mnShapePicker.SetValue(canvasPropertyToSet, 200d);
+
+            foreach(UIElement colorElement in mnColorPicker.Children)
+            {
+                colorElement.RenderTransformOrigin = renderTransformOriginForChildren;
+            }
+
+            mnColorPicker.RenderTransformOrigin = renderTransformOriginForParent; 
+           
+            foreach(UIElement shapeElement in mnShapePicker.Children)
+            {
+                shapeElement.RenderTransformOrigin = renderTransformOriginForChildren;
+            }
+
+            mnShapePicker.RenderTransformOrigin = renderTransformOriginForParent;
+
+            basket.ClearValue(canvasPropertyToSet);
+            basket.SetValue(canvasPropertyToClean, 0d);
         }
 
         private void OnPositionChange(LeapEvent leapEvent)
@@ -244,7 +319,15 @@ namespace LeapMotionExploration.Windows.Samples
                 _currentShapeCandidate.Fill = _mnColorPickerItems[_currentColorPickerItemIndex].Background;
 
                 _currentShapeCandidate.SetBinding(Canvas.TopProperty, _mbCanvasTop);
-                _currentShapeCandidate.SetValue(Canvas.LeftProperty, SHAPE_CANDIDATE_LEFT_MARGIN);
+
+                if (_mainHand.Equals(LeapUtils.RIGHT_MOST_HAND))
+                {
+                    _currentShapeCandidate.SetValue(Canvas.RightProperty, SHAPE_CANDIDATE_LEFT_MARGIN);
+                } else
+                {
+                    _currentShapeCandidate.SetValue(Canvas.LeftProperty, SHAPE_CANDIDATE_LEFT_MARGIN);
+                }
+                
 
                 cursorContainer.Children.Add(_currentShapeCandidate);
                 _graphicElements.Add(_currentShapeCandidate);
@@ -708,6 +791,10 @@ namespace LeapMotionExploration.Windows.Samples
 
                 //Store original position of the element, in case of cancel
                 _originalGraphicElementPoint.X = Canvas.GetLeft(_hoveredGraphicElement);
+                if (double.IsNaN(_originalGraphicElementPoint.X))
+                {
+                    _originalGraphicElementPoint.X = cursorContainer.ActualWidth - Canvas.GetRight(_hoveredGraphicElement) - _hoveredGraphicElement.ActualWidth;
+                }
                 _originalGraphicElementPoint.Y = Canvas.GetTop(_hoveredGraphicElement);
 
                 //Store starting Point
@@ -723,7 +810,7 @@ namespace LeapMotionExploration.Windows.Samples
                 //Save the current spawning point
                 if (_hoveredGraphicElement.Equals(_currentShapeCandidate))
                 {
-                    _currentShapeCandidateSpawn = new Point(SHAPE_CANDIDATE_LEFT_MARGIN + _currentShapeCandidate.ActualWidth / 2, cursorContainer.ActualHeight / 2);
+                    _currentShapeCandidateSpawn = new Point(_originalGraphicElementPoint.X + _currentShapeCandidate.ActualWidth / 2, _originalGraphicElementPoint.Y + _currentShapeCandidate.ActualHeight / 2);
                 }
             }));
 
@@ -805,7 +892,16 @@ namespace LeapMotionExploration.Windows.Samples
                 if (_hoveredGraphicElement != null && _hoveredGraphicElement.Equals(_currentShapeCandidate))
                 {
                     _currentShapeCandidate.SetBinding(Canvas.TopProperty, _mbCanvasTop);
-                    _currentShapeCandidate.SetValue(Canvas.LeftProperty, SHAPE_CANDIDATE_LEFT_MARGIN);
+                    if (_mainHand.Equals(LeapUtils.RIGHT_MOST_HAND))
+                    {
+                        _currentShapeCandidate.ClearValue(Canvas.LeftProperty);
+                        _currentShapeCandidate.SetValue(Canvas.RightProperty, SHAPE_CANDIDATE_LEFT_MARGIN);
+                    }
+                    else
+                    {
+                        _currentShapeCandidate.SetValue(Canvas.LeftProperty, SHAPE_CANDIDATE_LEFT_MARGIN);
+                    }
+                    
                 }
             }));
         }
