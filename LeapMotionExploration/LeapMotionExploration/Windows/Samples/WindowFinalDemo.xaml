@@ -190,6 +190,16 @@
                 </TextBlock.RenderTransform>
             </TextBlock>
             <TextBlock x:Name="mnShapePickerEllipse" Text="Ellipse" TextAlignment="Center" Width="100" FontFamily="Roboto Lt" FontSize="16" Background="#d3d3d3" Padding="10" HorizontalAlignment="Center" VerticalAlignment="Center" RenderTransformOrigin="-0.8,0.5"/>
+            <TextBlock x:Name="mnShapePickerTriangle" Text="Triangle" TextAlignment="Center" Width="100" FontFamily="Roboto Lt" FontSize="16" Background="#d3d3d3" Padding="10" HorizontalAlignment="Center" VerticalAlignment="Center" RenderTransformOrigin="-0.8,0.5">
+                <TextBlock.RenderTransform>
+                    <TransformGroup>
+                        <ScaleTransform/>
+                        <SkewTransform/>
+                        <RotateTransform Angle="45"/>
+                        <TranslateTransform/>
+                    </TransformGroup>
+                </TextBlock.RenderTransform>
+            </TextBlock>
         </Grid>
 
 
