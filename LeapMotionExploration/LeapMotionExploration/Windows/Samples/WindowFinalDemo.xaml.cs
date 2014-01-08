@@ -234,7 +234,10 @@ namespace LeapMotionExploration.Windows.Samples
             mnShapePicker.RenderTransformOrigin = renderTransformOriginForParent;
 
             basket.ClearValue(canvasPropertyToSet);
-            basket.SetValue(canvasPropertyToClean, 0d);
+            basket.SetValue(canvasPropertyToClean, -100d);
+
+            basketIcon.ClearValue(canvasPropertyToSet);
+            basketIcon.SetValue(canvasPropertyToClean, 0d);
         }
 
         private void OnPositionChange(LeapEvent leapEvent)

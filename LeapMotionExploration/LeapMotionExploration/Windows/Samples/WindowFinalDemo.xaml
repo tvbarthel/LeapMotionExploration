@@ -204,7 +204,7 @@
 
 
         <Ellipse Name="basket" Height="200" Width="200"  Canvas.Right="-100" Canvas.Bottom="-100" Fill="#c3c3c3" ClipToBounds="True"/>
-        <Image Source="pack://application:,,,/Windows/Samples/Images/content_discard.png" Canvas.Bottom="0" Canvas.Right="0"/>
+        <Image Name="basketIcon" Source="pack://application:,,,/Windows/Samples/Images/content_discard.png" Canvas.Bottom="0" Canvas.Right="0"/>
 
         <!-- Leap Cursor-->
         <Ellipse x:Name="leapCursor" Panel.ZIndex="999999" Stroke="Black" StrokeThickness="2" Height="15" Width="15" Fill="#33000000" ClipToBounds="True"/>
