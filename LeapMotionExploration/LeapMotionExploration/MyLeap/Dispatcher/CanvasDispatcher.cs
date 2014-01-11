@@ -8,6 +8,7 @@ using System.Windows.Controls;
 using MyLeap.Interface;
 using MyLeap.Listener;
 using MyLeap.Event;
+using MyLeap.Utils;
 using Leap;
 
 namespace MyLeap.Dispatcher
@@ -26,6 +27,12 @@ namespace MyLeap.Dispatcher
 
         //Clap listener
         private LeapListenerClap _leapClapListener;
+
+        //Cursor listenr
+        private LeapListenerOneHandPosition _leapCursorListener;
+
+        //Cursor element
+        private FrameworkElement _leapCursor;
 
         public CanvasDispatcher(Canvas c)
         {
@@ -72,43 +79,105 @@ namespace MyLeap.Dispatcher
         }
 
         /**
+         * Register ui element wich act as a cursor
+         */
+        public void SetCursor(FrameworkElement cursor, int hand)
+        {
+            if (_leapCursorListener == null)
+            {
+                _leapCursorListener = new LeapListenerOneHandPosition(hand);
+                _controller.AddListener(_leapCursorListener);
+                _leapCursorListener.OnStateChange += this.OnPositionChange;
+            }
+
+            _leapCursor = cursor;
+        }
+
+        /**
+         * Use to remove all Listener and sipose leap
+         */
+        public void OnClose()
+        {
+            if (_controller != null)
+            {
+
+                if (_leapClapListener != null) _controller.RemoveListener(_leapClapListener);
+
+                if (_leapCursorListener != null) _controller.RemoveListener(_leapCursorListener);
+
+                _controller.Dispose();
+            }
+
+        }
+
+        private void OnPositionChange(LeapEvent leapEvent)
+        {
+            Leap.Vector position = leapEvent.Position;
+            if (_leapCursor != null)
+            {
+                Application.Current.Dispatcher.Invoke(new Action(() =>
+                {
+
+                    double x = _canvas.ActualWidth * position.x;
+                    double y = _canvas.ActualHeight * (1 - position.y);
+                    _leapCursor.SetValue(Canvas.TopProperty, y - _leapCursor.Height / 2);
+                    _leapCursor.SetValue(Canvas.LeftProperty, x - _leapCursor.Width / 2);
+
+
+                }));
+            }
+        }
+
+        /**
          * Called when clap gesture is recognized. 
          * Search if the event has happened on a registered item and call the right interface.
-         */ 
+         */
         private void OnClapDetected(LeapEvent e)
         {
             if (_iClapListeners != null && _iClapListeners.Count > 0)
             {
-                foreach (KeyValuePair<FrameworkElement, ILeapListenerClap> entry in _iClapListeners)
+                Application.Current.Dispatcher.Invoke(new Action(() =>
                 {
-                    if (IsCursorOnGraphicElement(entry.Key, e.Position.x, e.Position.y))
+                    foreach (KeyValuePair<FrameworkElement, ILeapListenerClap> entry in _iClapListeners)
                     {
-                        entry.Value.OnClapDetected(e);
+                        System.Diagnostics.Debug.WriteLine(e.Position.x + " " + e.Position.y);
+
+                        if (IsCursorOnGraphicElement(entry.Key, Canvas.GetLeft(_leapCursor), Canvas.GetTop(_leapCursor)))
+                        {
+                            entry.Value.OnClapDetected(e);
+                            System.Diagnostics.Debug.WriteLine("Clap on entry !");
+                        }
                     }
-                }
+                }));
             }
         }
 
         /**
          * Usefull methode used to know if the cursor or an event happened on a graphic element
-         */ 
+         */
         private Boolean IsCursorOnGraphicElement(FrameworkElement graphicElement, double posX, double posY)
         {
+            Boolean res = false;
             //Look for a top reference
-            double graphicElementTop = Canvas.GetTop(graphicElement);
-            if (double.IsNaN(graphicElementTop))
+            Application.Current.Dispatcher.Invoke(new Action(() =>
             {
-                graphicElementTop = _canvas.ActualHeight - Canvas.GetBottom(graphicElement) - graphicElement.ActualHeight;
-            }
+                double graphicElementTop = Canvas.GetTop(graphicElement);
+                if (double.IsNaN(graphicElementTop))
+                {
+                    graphicElementTop = _canvas.ActualHeight - Canvas.GetBottom(graphicElement) - graphicElement.ActualHeight;
+                }
 
-            //Look for a left reference
-            double graphicElementLeft = Canvas.GetLeft(graphicElement);
-            if (double.IsNaN(graphicElementLeft))
-            {
-                graphicElementLeft = _canvas.ActualWidth - Canvas.GetRight(graphicElement) - graphicElement.ActualWidth;
-            }
+                //Look for a left reference
+                double graphicElementLeft = Canvas.GetLeft(graphicElement);
+                if (double.IsNaN(graphicElementLeft))
+                {
+                    graphicElementLeft = _canvas.ActualWidth - Canvas.GetRight(graphicElement) - graphicElement.ActualWidth;
+                }
 
-            return !double.IsNaN(graphicElementLeft) && !double.IsNaN(graphicElementLeft) && posX > graphicElementLeft && posX < (graphicElementLeft + graphicElement.ActualWidth) && posY > graphicElementTop && posY < (graphicElementTop + graphicElement.ActualHeight);
+                res = !double.IsNaN(graphicElementLeft) && !double.IsNaN(graphicElementLeft) && posX > graphicElementLeft && posX < (graphicElementLeft + graphicElement.ActualWidth) && posY > graphicElementTop && posY < (graphicElementTop + graphicElement.ActualHeight);
+            }));
+
+            return res;
         }
 
     }
