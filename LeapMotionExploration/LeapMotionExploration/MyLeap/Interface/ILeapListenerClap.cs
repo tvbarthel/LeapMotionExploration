@@ -9,17 +9,39 @@ namespace MyLeap.Interface
 {
     /**
      * interface used to catch clap event
-     */ 
-    interface ILeapListenerClap
+     */
+    public class ILeapListenerClap
     {
+
+        private Action<LeapEvent> _onClapeDetected;
+        private Action<String> _onStateChange;
+
+        public ILeapListenerClap(Action<LeapEvent> clapDetection)
+            : this(clapDetection, null)
+        {
+
+        }
+
+        public ILeapListenerClap(Action<LeapEvent> clapDetection, Action<String> stateChange)
+        {
+            _onClapeDetected = clapDetection;
+            _onStateChange = stateChange;
+        }
+
         /**
          * fired when clap happened
-         */ 
-        void OnClapDetected(LeapEvent e);
+         */
+        public void OnClapDetected(LeapEvent e)
+        {
+            if (_onClapeDetected != null) _onClapeDetected(e);
+        }
 
         /**
          * fired each time state of the gesture change
-         */ 
-        void OnClapStateChange(String state);
+         */
+        public void OnClapStateChange(String state)
+        {
+            if (_onStateChange != null) _onStateChange(state);
+        }
     }
 }
