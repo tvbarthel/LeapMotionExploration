@@ -1,8 +1,15 @@
 ﻿<Window x:Class="LeapMotionExploration.Windows.Samples.WindowDispatcher"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="WindowDispatcher" Height="300" Width="300">
-    <Grid>
+        Title="WindowDispatcher" Height="600" Width="600">
+    <Canvas Name="canvas">
         
-    </Grid>
+        <TextBlock Name="info" Height="20" Width="100"/>
+
+        <Rectangle Name="right" Height="100" Width="100" Fill="Aqua" Canvas.Top="50" Canvas.Right="100"/>
+
+        <Rectangle Name="left" Height="100" Width="100" Fill="Brown" Canvas.Top="50" Canvas.Left="100"/>
+        
+        <Ellipse Name="cursor" Panel.ZIndex="100" Height="10" Width="10" Fill="#AAAAAA" ClipToBounds="True"/>
+    </Canvas>
 </Window>
