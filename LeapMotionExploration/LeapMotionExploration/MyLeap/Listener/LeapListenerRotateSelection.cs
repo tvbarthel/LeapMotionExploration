@@ -15,27 +15,27 @@ namespace MyLeap.Listener
 
         public event Action<LeapEvent> OnStateChange;
 
-        private LeapProcessorHandClosed processorLeftHandClosed;
-        private LeapProcessorTwoHandRoll processorHandRoll;
-        private Vector ClosePosition;
-        private Boolean isMainHandClosed;
+        private LeapProcessorHandClosed _processorLeftHandClosed;
+        private LeapProcessorTwoHandRoll _processorHandRoll;
+        private Vector _closePosition;
+        private Boolean _isMainHandClosed;
         private int _mainHand;
-        private float lastRoll;
+        private float _lastRoll;
 
         public LeapListenerRotateSelection(int mainHand)
         {
-            isMainHandClosed = false;
+            _isMainHandClosed = false;
 
             _mainHand = mainHand;
 
-            processorLeftHandClosed = new LeapProcessorHandClosed();
-            processorLeftHandClosed.onHandStateChange += mostLeftHandStateChanged;
-            processorLeftHandClosed.onStateChange += (x) => { };
+            _processorLeftHandClosed = new LeapProcessorHandClosed();
+            _processorLeftHandClosed.OnHandStateChange += MainHandStateChanged;
+            _processorLeftHandClosed.OnStateChange += (x) => { };
 
-            processorHandRoll = new LeapProcessorTwoHandRoll();
-            processorHandRoll.onAngleChanged += rollAngleChanged;
+            _processorHandRoll = new LeapProcessorTwoHandRoll();
+            _processorHandRoll.OnAngleChanged += RollAngleChanged;
 
-            lastRoll = 0;
+            _lastRoll = 0;
         }
 
         public LeapListenerRotateSelection() : this(LeapUtils.RIGHT_MOST_HAND)
@@ -47,11 +47,11 @@ namespace MyLeap.Listener
             var frame = controller.Frame();
             if (frame.IsValid)
             {
-                processorLeftHandClosed.process(GetMainHand(frame));
+                _processorLeftHandClosed.Process(GetMainHand(frame));
                 
-                if (isMainHandClosed && frame.Hands.Count == 2)
+                if (_isMainHandClosed && frame.Hands.Count == 2)
                 {
-                    processorHandRoll.process(frame.Hands.Leftmost, frame.Hands.Rightmost);
+                    _processorHandRoll.Process(frame.Hands.Leftmost, frame.Hands.Rightmost);
                 }
 
             }
@@ -67,42 +67,42 @@ namespace MyLeap.Listener
             return frame.Hands.Leftmost;
         }
 
-        public void rollAngleChanged(float newRoll)
+        public void RollAngleChanged(float newRoll)
         {
-            if (lastRoll != 0)
+            if (_lastRoll != 0)
             {
-                if (newRoll > lastRoll)
+                if (newRoll > _lastRoll)
                 {
                     System.Diagnostics.Debug.WriteLine("Select Next !");
-                    Task.Factory.StartNew(() => OnStateChange(new LeapEvent(ClosePosition, LeapEvent.ROTATION_SELECTION_NEXT)));
+                    Task.Factory.StartNew(() => OnStateChange(new LeapEvent(_closePosition, LeapEvent.ROTATION_SELECTION_NEXT)));
                     
                 }
                 else
                 {
                     System.Diagnostics.Debug.WriteLine("Select Previous !");
-                    Task.Factory.StartNew(() => OnStateChange(new LeapEvent(ClosePosition, LeapEvent.ROTATION_SELECTION_PREVIOUS)));
+                    Task.Factory.StartNew(() => OnStateChange(new LeapEvent(_closePosition, LeapEvent.ROTATION_SELECTION_PREVIOUS)));
                 }
             }
-            lastRoll = newRoll;
+            _lastRoll = newRoll;
         }
 
-        public void mostLeftHandStateChanged(HandCloseEvent handClose)
+        public void MainHandStateChanged(HandCloseEvent handClose)
         {
             int type = handClose.Type;
             switch (type)
             {
                 case HandCloseEvent.CLOSE:
                     System.Diagnostics.Debug.WriteLine("Selection Started !");
-                    isMainHandClosed = true;
-                    ClosePosition = handClose.Position;
-                    lastRoll = 0f;
-                    Task.Factory.StartNew(() => OnStateChange(new LeapEvent(ClosePosition, LeapEvent.ROTATION_SELECTION_START)));
+                    _isMainHandClosed = true;
+                    _closePosition = handClose.Position;
+                    _lastRoll = 0f;
+                    Task.Factory.StartNew(() => OnStateChange(new LeapEvent(_closePosition, LeapEvent.ROTATION_SELECTION_START)));
                     break;
                 case HandCloseEvent.OPEN:
                     System.Diagnostics.Debug.WriteLine("Selection Ended !");
-                    isMainHandClosed = false;                    
-                    Task.Factory.StartNew(() => OnStateChange(new LeapEvent(ClosePosition, LeapEvent.ROTATION_SELECTION_END)));
-                    ClosePosition = null;
+                    _isMainHandClosed = false;                    
+                    Task.Factory.StartNew(() => OnStateChange(new LeapEvent(_closePosition, LeapEvent.ROTATION_SELECTION_END)));
+                    _closePosition = null;
                     break;
             }
         }

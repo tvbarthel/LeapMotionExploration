@@ -9,36 +9,36 @@ namespace MyLeap.Processor
 {
     class LeapProcessorTwoHandRoll
     {
-        public event Action<float> onAngleChanged;
+        public event Action<float> OnAngleChanged;
 
         public const float ROLL_DELTA_SMALL = 0.10f;
         public const float ROLL_DELTA_NORMAL = 0.20f;
         public const float ROLL_DELTA_HIGH = 0.30f;
 
-        private float rollDelta;
-        private float lastRoll;
+        private float _rollDelta;
+        private float _lastRoll;
 
         public LeapProcessorTwoHandRoll(float delta)
         {
-            rollDelta = delta;
+            _rollDelta = delta;
         }
 
         public LeapProcessorTwoHandRoll()
         {
-            rollDelta = ROLL_DELTA_NORMAL;
+            _rollDelta = ROLL_DELTA_NORMAL;
         }
 
 
-        public void process(Hand leftMostHand, Hand rightMostHand) {
+        public void Process(Hand leftMostHand, Hand rightMostHand) {
             Vector twoPalmVector = new Vector(rightMostHand.PalmPosition.x - leftMostHand.PalmPosition.x,
                 rightMostHand.PalmPosition.y - leftMostHand.PalmPosition.y,
                 rightMostHand.PalmPosition.z - leftMostHand.PalmPosition.z);
             float candidateRoll = twoPalmVector.Roll;
-            if (Math.Abs(candidateRoll - lastRoll) > rollDelta)
+            if (Math.Abs(candidateRoll - _lastRoll) > _rollDelta)
             {
-                lastRoll = candidateRoll;
-                System.Diagnostics.Debug.WriteLine("Angle -> " + lastRoll);
-                Task.Factory.StartNew(() => onAngleChanged(lastRoll));
+                _lastRoll = candidateRoll;
+                System.Diagnostics.Debug.WriteLine("Angle -> " + _lastRoll);
+                Task.Factory.StartNew(() => OnAngleChanged(_lastRoll));
             }
             
         }

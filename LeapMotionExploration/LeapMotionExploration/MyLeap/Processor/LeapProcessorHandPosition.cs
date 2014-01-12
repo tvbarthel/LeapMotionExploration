@@ -11,7 +11,7 @@ namespace MyLeap.Processor
     {
         public event Action<Vector> OnPositionChange;
 
-        public void process(Hand hand)
+        public void Process(Hand hand)
         {
             var palmPosition = hand.StabilizedPalmPosition;
             if (palmPosition.IsValid())

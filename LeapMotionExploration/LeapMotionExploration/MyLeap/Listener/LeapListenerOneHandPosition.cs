@@ -15,14 +15,14 @@ namespace MyLeap.Listener
 
         public event Action<LeapEvent> OnStateChange;
 
-        private LeapProcessorHandPosition processorHandPosition;
-        private int HandPreference;
+        private LeapProcessorHandPosition _processorHandPosition;
+        private int _handPreference;
 
         public LeapListenerOneHandPosition(int handPreference)
         {
-            HandPreference = handPreference;
-            processorHandPosition = new LeapProcessorHandPosition();
-            processorHandPosition.OnPositionChange += OnPositionChange;
+            _handPreference = handPreference;
+            _processorHandPosition = new LeapProcessorHandPosition();
+            _processorHandPosition.OnPositionChange += OnPositionChange;
         }
 
         public LeapListenerOneHandPosition() : this(LeapUtils.RIGHT_MOST_HAND)
@@ -36,11 +36,11 @@ namespace MyLeap.Listener
             if (frame.IsValid)
             {
                 Hand handToProcess = frame.Hands.Rightmost;
-                if (HandPreference == LeapUtils.LEFT_MOST_HAND)
+                if (_handPreference == LeapUtils.LEFT_MOST_HAND)
                 {
                     handToProcess = frame.Hands.Leftmost;
                 }
-                processorHandPosition.process(handToProcess);
+                _processorHandPosition.Process(handToProcess);
             }
         }
 
@@ -49,9 +49,9 @@ namespace MyLeap.Listener
             Task.Factory.StartNew(() => OnStateChange(new LeapEvent(position, LeapEvent.POSITION)));
         }
 
-        public void setHandPreference(int handPreference)
+        public void SetHandPreference(int handPreference)
         {
-            HandPreference = handPreference;
+            _handPreference = handPreference;
         }
 
     }

@@ -15,27 +15,27 @@ namespace MyLeap.Processor
         public const double DISTANCE_DELTA_NORMAL = 1.0;
         public const double DISTANCE_DELTA_HIGH = 2.0;
 
-        private double distanceDelta;
-        private double lastDistance;
+        private double _distanceDelta;
+        private double _lastDistance;
 
         public LeapProcessorTwoHandDistance(double delta)
         {
-            distanceDelta = delta;
+            _distanceDelta = delta;
         }
 
         public LeapProcessorTwoHandDistance()
         {
-            distanceDelta = DISTANCE_DELTA_NORMAL;
+            _distanceDelta = DISTANCE_DELTA_NORMAL;
         }
 
-        public void process(Hand mostLeftHand, Hand mostRightHand)
+        public void Process(Hand mostLeftHand, Hand mostRightHand)
         {
             double currentDistance = Math.Sqrt(Math.Pow(mostLeftHand.PalmPosition.x - mostRightHand.PalmPosition.x, 2) + Math.Pow(mostLeftHand.PalmPosition.y - mostRightHand.PalmPosition.y, 2));
-            if (Math.Abs(currentDistance - lastDistance) > distanceDelta)
+            if (Math.Abs(currentDistance - _lastDistance) > _distanceDelta)
             {
                 System.Diagnostics.Debug.WriteLine("Distance Changed -> " + currentDistance);
                 Task.Factory.StartNew(() => OnDistanceChanged(currentDistance));
-                lastDistance = currentDistance;
+                _lastDistance = currentDistance;
             }
         }
     }

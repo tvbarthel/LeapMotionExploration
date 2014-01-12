@@ -13,37 +13,37 @@ namespace MyLeap.Listener
     {
         public event Action<LeapEvent> OnStateChange;
         
-        private LeapProcessorHandClosed processorLeftHandClosed;
-        private LeapProcessorHandClosed processorRightHandClosed;
-        private LeapProcessorTwoHandRoll processorHandRoll;
-        private LeapProcessorTwoHandDistance processorHandDistance;
-        private Vector ClosePosition;
-        private Boolean isLeftHandClosed;
-        private Boolean isRightHandClosed;
-        private float lastRoll;
-        private double lastDistance;
+        private LeapProcessorHandClosed _processorLeftHandClosed;
+        private LeapProcessorHandClosed _processorRightHandClosed;
+        private LeapProcessorTwoHandRoll _processorHandRoll;
+        private LeapProcessorTwoHandDistance _processorHandDistance;
+        private Vector _closePosition;
+        private Boolean _isLeftHandClosed;
+        private Boolean _isRightHandClosed;
+        private float _lastRoll;
+        private double _lastDistance;
 
         public LeapListenerTwoHandManipulation()
         {
-            isLeftHandClosed = false;
-            isRightHandClosed = false;
+            _isLeftHandClosed = false;
+            _isRightHandClosed = false;
 
-            processorLeftHandClosed = new LeapProcessorHandClosed();
-            processorLeftHandClosed.onHandStateChange += mostLeftHandStateChanged;
-            processorLeftHandClosed.onStateChange += (x) => { };
+            _processorLeftHandClosed = new LeapProcessorHandClosed();
+            _processorLeftHandClosed.OnHandStateChange += MostLeftHandStateChanged;
+            _processorLeftHandClosed.OnStateChange += (x) => { };
 
-            processorRightHandClosed = new LeapProcessorHandClosed();
-            processorRightHandClosed.onHandStateChange += mostRightHandStateChanged;
-            processorRightHandClosed.onStateChange += (x) => { };
+            _processorRightHandClosed = new LeapProcessorHandClosed();
+            _processorRightHandClosed.OnHandStateChange += MostRightHandStateChanged;
+            _processorRightHandClosed.OnStateChange += (x) => { };
 
-            processorHandRoll = new LeapProcessorTwoHandRoll(0.01f);
-            processorHandRoll.onAngleChanged += rollAngleChanged;
+            _processorHandRoll = new LeapProcessorTwoHandRoll(0.01f);
+            _processorHandRoll.OnAngleChanged += RollAngleChanged;
 
-            processorHandDistance = new LeapProcessorTwoHandDistance(1);
-            processorHandDistance.OnDistanceChanged += HandDistanceChanged;
+            _processorHandDistance = new LeapProcessorTwoHandDistance(1);
+            _processorHandDistance.OnDistanceChanged += HandDistanceChanged;
 
-            lastRoll = 0;
-            lastDistance = 0;
+            _lastRoll = 0;
+            _lastDistance = 0;
         }
 
         public override void OnFrame(Controller controller)
@@ -51,26 +51,26 @@ namespace MyLeap.Listener
             var frame = controller.Frame();
             if (frame.IsValid)
             {
-                processorLeftHandClosed.process(frame.Hands.Leftmost);
+                _processorLeftHandClosed.Process(frame.Hands.Leftmost);
 
                 if (frame.Hands.Count == 2)
                 {
-                    processorRightHandClosed.process(frame.Hands.Rightmost);
+                    _processorRightHandClosed.Process(frame.Hands.Rightmost);
                 }
                 else
                 {
-                    isRightHandClosed = false;
+                    _isRightHandClosed = false;
                 }
 
-                if (isLeftHandClosed)
+                if (_isLeftHandClosed)
                 {
-                    if (isRightHandClosed)
+                    if (_isRightHandClosed)
                     {
-                        processorHandDistance.process(frame.Hands.Leftmost, frame.Hands.Rightmost);
+                        _processorHandDistance.Process(frame.Hands.Leftmost, frame.Hands.Rightmost);
                     }
                     else
                     {
-                        processorHandRoll.process(frame.Hands.Leftmost, frame.Hands.Rightmost);   
+                        _processorHandRoll.Process(frame.Hands.Leftmost, frame.Hands.Rightmost);   
                     }                    
                 }
             }
@@ -78,56 +78,56 @@ namespace MyLeap.Listener
 
         public void HandDistanceChanged(double newDistance)
         {
-            if (lastDistance != 0)
+            if (_lastDistance != 0)
             {
-                if (newDistance > lastDistance)
+                if (newDistance > _lastDistance)
                 {
                     System.Diagnostics.Debug.WriteLine("Size increases !");
-                    Task.Factory.StartNew(() => OnStateChange(new LeapEvent(ClosePosition, LeapEvent.TRANSFORMATION_SIZE_UP)));                    
+                    Task.Factory.StartNew(() => OnStateChange(new LeapEvent(_closePosition, LeapEvent.TRANSFORMATION_SIZE_UP)));                    
                 }
                 else
                 {
                     System.Diagnostics.Debug.WriteLine("Size decrease !");
-                    Task.Factory.StartNew(() => OnStateChange(new LeapEvent(ClosePosition, LeapEvent.TRANSFORMATION_SIZE_DOWN)));
+                    Task.Factory.StartNew(() => OnStateChange(new LeapEvent(_closePosition, LeapEvent.TRANSFORMATION_SIZE_DOWN)));
                 }
             }
-            lastDistance = newDistance;
+            _lastDistance = newDistance;
         }
 
-        public void rollAngleChanged(float newRoll)
+        public void RollAngleChanged(float newRoll)
         {
-            if(lastRoll != 0)
+            if(_lastRoll != 0)
             {
-                if (newRoll > lastRoll)
+                if (newRoll > _lastRoll)
                 {
                     System.Diagnostics.Debug.WriteLine("Rotate Unclockwize !");
-                    Task.Factory.StartNew(() => OnStateChange(new LeapEvent(ClosePosition, LeapEvent.TRANSFORMATION_ROTATE_UNCLOCKWIZE)));
+                    Task.Factory.StartNew(() => OnStateChange(new LeapEvent(_closePosition, LeapEvent.TRANSFORMATION_ROTATE_UNCLOCKWIZE)));
                 }
                 else
                 {
                     System.Diagnostics.Debug.WriteLine("Rotate Clocksize !");
-                    Task.Factory.StartNew(() => OnStateChange(new LeapEvent(ClosePosition, LeapEvent.TRANSFORMATION_ROTATE_CLOCKWIZE)));
+                    Task.Factory.StartNew(() => OnStateChange(new LeapEvent(_closePosition, LeapEvent.TRANSFORMATION_ROTATE_CLOCKWIZE)));
                 }
             }
-            lastRoll = newRoll;
+            _lastRoll = newRoll;
         }
 
-        public void mostLeftHandStateChanged(HandCloseEvent e)
+        public void MostLeftHandStateChanged(HandCloseEvent e)
         {
-            isLeftHandClosed = e.Type.Equals(HandCloseEvent.OPEN) ? false : true;
-            if (isLeftHandClosed)
+            _isLeftHandClosed = e.Type.Equals(HandCloseEvent.OPEN) ? false : true;
+            if (_isLeftHandClosed)
             {
-                ClosePosition = e.Position;
+                _closePosition = e.Position;
             }
             else
             {
-                ClosePosition = null;
+                _closePosition = null;
             }
         }
 
-        public void mostRightHandStateChanged(HandCloseEvent e)
+        public void MostRightHandStateChanged(HandCloseEvent e)
         {
-            isRightHandClosed = e.Type.Equals(HandCloseEvent.OPEN) ? false : true;
+            _isRightHandClosed = e.Type.Equals(HandCloseEvent.OPEN) ? false : true;
         }
     }
 }

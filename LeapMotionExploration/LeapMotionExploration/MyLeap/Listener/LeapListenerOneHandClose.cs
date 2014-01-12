@@ -13,15 +13,16 @@ namespace MyLeap.Listener
     class LeapListenerOneHandClose : Leap.Listener
     {
         public event Action<HandCloseEvent> OnHandStateChange;
-        private LeapProcessorHandClosed detector;
-        private int HandPreference;
+
+        private LeapProcessorHandClosed _detector;
+        private int _handPreference;
 
         public LeapListenerOneHandClose(int handPreference)
         {
-            HandPreference = handPreference;
-            detector = new LeapProcessorHandClosed();
-            detector.onHandStateChange += mostLeftHandStateChanged;
-            detector.onStateChange += (x) => { };
+            _handPreference = handPreference;
+            _detector = new LeapProcessorHandClosed();
+            _detector.OnHandStateChange += HandStateChanged;
+            _detector.OnStateChange += (x) => { };
         }
 
         public LeapListenerOneHandClose() : this(LeapUtils.RIGHT_MOST_HAND) {
@@ -33,18 +34,18 @@ namespace MyLeap.Listener
             var frame = controller.Frame();
             if (frame.IsValid)
             {
-                if (HandPreference == LeapUtils.RIGHT_MOST_HAND)
+                if (_handPreference == LeapUtils.RIGHT_MOST_HAND)
                 {
-                    detector.process(frame.Hands.Rightmost);
+                    _detector.Process(frame.Hands.Rightmost);
                 }
-                else if (HandPreference == LeapUtils.LEFT_MOST_HAND)
+                else if (_handPreference == LeapUtils.LEFT_MOST_HAND)
                 {
-                    detector.process(frame.Hands.Leftmost);
+                    _detector.Process(frame.Hands.Leftmost);
                 }                
             }
         }
 
-        public void mostLeftHandStateChanged(HandCloseEvent e)
+        public void HandStateChanged(HandCloseEvent e)
         {
             Task.Factory.StartNew(() => OnHandStateChange(e));
         }

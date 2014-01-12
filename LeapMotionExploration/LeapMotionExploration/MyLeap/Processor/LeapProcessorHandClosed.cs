@@ -11,8 +11,8 @@ namespace MyLeap.Processor
 {
     class LeapProcessorHandClosed
     {
-        public event Action<HandCloseEvent> onHandStateChange;
-        public event Action<int> onStateChange;
+        public event Action<HandCloseEvent> OnHandStateChange;
+        public event Action<int> OnStateChange;
 
         private const int STEP_0_UNKNOW = 0;
         private const int STEP_1_FULLY_OPENED = 1;
@@ -24,19 +24,19 @@ namespace MyLeap.Processor
         private const double HAND_CLOSING_CONTINUE_Y = -20.0;
         private const double MIN_DISTANCE_FOR_ONE_FINGER = 90.0;
 
-        private int currentStep;
-        private Leap.Vector eventPosition;
+        private int _currentStep;
+        private Leap.Vector _eventPosition;
 
         public LeapProcessorHandClosed()
         {
-            currentStep = 0;
+            _currentStep = 0;
         }
 
-        public void process(Hand hand)
+        public void Process(Hand hand)
         {
             if (hand.IsValid)
             {
-                switch (currentStep)
+                switch (_currentStep)
                 {
                     /**
                      * The hand is in a unknown state
@@ -44,7 +44,7 @@ namespace MyLeap.Processor
                      * that means at least 4 fingers detected.
                      */
                     case STEP_0_UNKNOW:
-                        handleStepO(hand);
+                        HandleStepO(hand);
                         break;
 
                     /**
@@ -52,8 +52,8 @@ namespace MyLeap.Processor
                      * To go to the next step, we need to detect fingers going down.
                      */
                     case STEP_1_FULLY_OPENED:
-                        eventPosition = hand.Fingers.Frontmost.StabilizedTipPosition.Normalized;
-                        handleStep1(hand);
+                        _eventPosition = hand.Fingers.Frontmost.StabilizedTipPosition.Normalized;
+                        HandleStep1(hand);
                         break;
 
                     /**
@@ -61,7 +61,7 @@ namespace MyLeap.Processor
                      * To go to the next step, we need to detect fingers going even more down.
                      */
                     case STEP_2_HALF_OPENED:
-                        handleStep2(hand);
+                        HandleStep2(hand);
                         break;
 
                     /**
@@ -69,7 +69,7 @@ namespace MyLeap.Processor
                      * To go to the next step, we need to detect no fingers.
                      */
                     case STEP_3_NEARLY_CLOSED:
-                        handleStep3(hand);
+                        HandleStep3(hand);
                         break;
 
                     /**
@@ -77,124 +77,124 @@ namespace MyLeap.Processor
                      * If we detect at least on finger, we go back to the previous step.
                      */
                     case STEP_4_CLOSED:
-                        handleStep4(hand);
+                        HandleStep4(hand);
                         break;
                 }
             }
             else
             {
-                if (currentStep != STEP_0_UNKNOW)
+                if (_currentStep != STEP_0_UNKNOW)
                 {
-                    currentStep = STEP_0_UNKNOW;
+                    _currentStep = STEP_0_UNKNOW;
                     System.Diagnostics.Debug.WriteLine("No Hands. Get back to the step 0 !");
-                    Task.Factory.StartNew(() => onHandStateChange(new HandCloseEvent(eventPosition,false)));
+                    Task.Factory.StartNew(() => OnHandStateChange(new HandCloseEvent(_eventPosition,false)));
                 }
             }
         }
 
-        private void handleStepO(Hand hand)
+        private void HandleStepO(Hand hand)
         {
             if (hand.Fingers.Count >= 4)
             {
                 //An oppenned hand has been detected.
                 //Get to the next step
-                currentStep = STEP_1_FULLY_OPENED;
+                _currentStep = STEP_1_FULLY_OPENED;
                 System.Diagnostics.Debug.WriteLine("Get to the first step !");
-                Task.Factory.StartNew(() => onStateChange(STEP_1_FULLY_OPENED));
+                Task.Factory.StartNew(() => OnStateChange(STEP_1_FULLY_OPENED));
             }
             else if (hand.Fingers.Count == 0)
             {
                 System.Diagnostics.Debug.WriteLine("The hand has been detected without any fingers!");
-                currentStep = STEP_4_CLOSED;
-                Task.Factory.StartNew(() => onHandStateChange(new HandCloseEvent(eventPosition,true)));
-                Task.Factory.StartNew(() => onStateChange(STEP_4_CLOSED));
+                _currentStep = STEP_4_CLOSED;
+                Task.Factory.StartNew(() => OnHandStateChange(new HandCloseEvent(_eventPosition,true)));
+                Task.Factory.StartNew(() => OnStateChange(STEP_4_CLOSED));
             }
         }
 
-        private void handleStep1(Hand hand)
+        private void HandleStep1(Hand hand)
         {
             //Compute the current average Y distance
             if (hand.Fingers.Count >= 4)
             {
-                double currentAverageYDistance = computeAverageFingerYDistance(hand);
+                double currentAverageYDistance = ComputeAverageFingerYDistance(hand);
                 if (currentAverageYDistance <= HAND_CLOSING_START_Y)
                 {
-                    currentStep = STEP_2_HALF_OPENED;
+                    _currentStep = STEP_2_HALF_OPENED;
                     System.Diagnostics.Debug.WriteLine("Hand closing starts! Go to step 2 !");
-                    Task.Factory.StartNew(() => onStateChange(STEP_2_HALF_OPENED));
+                    Task.Factory.StartNew(() => OnStateChange(STEP_2_HALF_OPENED));
                 }
             }
             else
             {
-                currentStep = STEP_3_NEARLY_CLOSED;
+                _currentStep = STEP_3_NEARLY_CLOSED;
                 System.Diagnostics.Debug.WriteLine("Jump directly to step 3 !");
-                Task.Factory.StartNew(() => onStateChange(STEP_3_NEARLY_CLOSED));
+                Task.Factory.StartNew(() => OnStateChange(STEP_3_NEARLY_CLOSED));
             }
         }
 
-        private void handleStep2(Hand hand)
+        private void HandleStep2(Hand hand)
         {
 
-            double currentAverageYDistance = computeAverageFingerYDistance(hand);
+            double currentAverageYDistance = ComputeAverageFingerYDistance(hand);
             if (currentAverageYDistance > HAND_CLOSING_START_Y)
             {
                 //The fingers have gone up.
                 //Go back to the previous step;
-                currentStep = STEP_1_FULLY_OPENED;
+                _currentStep = STEP_1_FULLY_OPENED;
                 System.Diagnostics.Debug.WriteLine("Fingers went up! Go to step 1 !");
-                Task.Factory.StartNew(() => onStateChange(STEP_1_FULLY_OPENED));
+                Task.Factory.StartNew(() => OnStateChange(STEP_1_FULLY_OPENED));
             }
             else if (currentAverageYDistance <= HAND_CLOSING_CONTINUE_Y)
             {
                 //Fingers have gone even more down
                 //The user is closing is hand.
-                currentStep = STEP_3_NEARLY_CLOSED;
+                _currentStep = STEP_3_NEARLY_CLOSED;
                 System.Diagnostics.Debug.WriteLine("Hand closing continues! Go to step 3");
-                Task.Factory.StartNew(() => onStateChange(STEP_3_NEARLY_CLOSED));
+                Task.Factory.StartNew(() => OnStateChange(STEP_3_NEARLY_CLOSED));
             }
 
         }
 
-        private void handleStep3(Hand hand)
+        private void HandleStep3(Hand hand)
         {
-            double currentAverageYDistance = computeAverageFingerYDistance(hand);
+            double currentAverageYDistance = ComputeAverageFingerYDistance(hand);
             if (hand.Fingers.Count >= 3 && currentAverageYDistance > HAND_CLOSING_CONTINUE_Y)
             {
                 //The fingers have gone up
                 //Go back to the previous step
-                currentStep = STEP_2_HALF_OPENED;
+                _currentStep = STEP_2_HALF_OPENED;
                 System.Diagnostics.Debug.WriteLine("Fingers went up! Go to step 2 !");
-                Task.Factory.StartNew(() => onStateChange(STEP_2_HALF_OPENED));
+                Task.Factory.StartNew(() => OnStateChange(STEP_2_HALF_OPENED));
             }
             else if (hand.Fingers.Count == 0)
             {
                 //No fingers are detecteds
                 //go to the next step
-                currentStep = STEP_4_CLOSED;                
+                _currentStep = STEP_4_CLOSED;                
                 System.Diagnostics.Debug.WriteLine("The hand is now closed! Go to step 4");
-                Task.Factory.StartNew(() => onHandStateChange(new HandCloseEvent(eventPosition, true)));
-                Task.Factory.StartNew(() => onStateChange(STEP_4_CLOSED));
+                Task.Factory.StartNew(() => OnHandStateChange(new HandCloseEvent(_eventPosition, true)));
+                Task.Factory.StartNew(() => OnStateChange(STEP_4_CLOSED));
             }
 
         }
 
-        private void handleStep4(Hand hand)
+        private void HandleStep4(Hand hand)
         {
             if (hand.Fingers.Count >= 2 || 
                 (hand.Fingers.Count == 1 && LeapUtils.computeDistanceBetweenPalmAndFingerTips(hand) >= MIN_DISTANCE_FOR_ONE_FINGER))
             {
                 //At least two finger is detected
                 //go back to the next step
-                currentStep = STEP_3_NEARLY_CLOSED;
+                _currentStep = STEP_3_NEARLY_CLOSED;
                 System.Diagnostics.Debug.WriteLine("Go back to step 3");
                 System.Diagnostics.Debug.WriteLine("Dist -> " + LeapUtils.computeDistanceBetweenPalmAndFingerTips(hand));
-                Task.Factory.StartNew(() => onHandStateChange(new HandCloseEvent(eventPosition, false)));
+                Task.Factory.StartNew(() => OnHandStateChange(new HandCloseEvent(_eventPosition, false)));
             }
         }
 
 
 
-        private double computeAverageFingerYDistance(Hand hand)
+        private double ComputeAverageFingerYDistance(Hand hand)
         {
             double res = 0;
             foreach (Finger finger in hand.Fingers)
