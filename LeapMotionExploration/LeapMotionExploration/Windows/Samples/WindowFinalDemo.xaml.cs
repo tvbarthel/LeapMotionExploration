@@ -95,11 +95,11 @@ namespace LeapMotionExploration.Windows.Samples
 
         private Point _currentCursorPoint;
 
-        public WindowFinalDemo()
+        public WindowFinalDemo(int mainHand)
         {
             InitializeComponent();
 
-            initMainHand(LeapUtils.RIGHT_MOST_HAND);
+            initMainHand(mainHand);
 
             _isDragging = false;
             _currentCursorPoint = new Point(0, 0);

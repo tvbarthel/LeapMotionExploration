@@ -32,7 +32,8 @@ namespace LeapMotionExploration.Windows
             buttonTwoHandManipulation.Click += buttonClick;
             buttonClapMusic.Click += buttonClick;
             buttonClap.Click += buttonClick;
-            buttonFinalDemo.Click += buttonClick;
+            buttonFinalDemoRightHanded.Click += buttonClick;
+            buttonFinalDemoLeftHanded.Click += buttonClick;
             buttonDispatcherTest.Click += buttonClick;
         }
 
@@ -70,9 +71,13 @@ namespace LeapMotionExploration.Windows
             {
                 new WindowClapSound().Show();
             }
-            else if (sender.Equals(buttonFinalDemo))
+            else if (sender.Equals(buttonFinalDemoRightHanded))
             {
-                new WindowFinalDemo().Show();
+                new WindowFinalDemo(LeapUtils.RIGHT_MOST_HAND).Show();
+            }
+            else if(sender.Equals(buttonFinalDemoLeftHanded))
+            {
+                new WindowFinalDemo(LeapUtils.LEFT_MOST_HAND).Show();
             }
             else if (sender.Equals(buttonDispatcherTest))
             {
