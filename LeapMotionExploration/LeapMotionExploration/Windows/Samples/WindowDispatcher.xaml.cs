@@ -32,15 +32,20 @@ namespace LeapMotionExploration.Windows.Samples
 
             _dispatcher.SetCursor(cursor,LeapUtils.LEFT_MOST_HAND);
 
-            _dispatcher.AddClapListener(left, new ILeapListenerClap( e => 
-            {
-                info.Text  = "Left";           
-            }));
+            ILeapListenerClap clapListener = new ILeapListenerClap(leapEvent => {
+                if (leapEvent.Source == right)
+                {
+                    info.Text = "Right";
+                }
+                else if (leapEvent.Source == left)
+                {
+                    info.Text = "Left";
+                }
+            });
 
-            _dispatcher.AddClapListener(right, new ILeapListenerClap(e =>
-            {
-                info.Text = "Right";
-            }));
+            _dispatcher.AddClapListener(left, clapListener);
+
+            _dispatcher.AddClapListener(right, clapListener);
         }
 
         protected override void OnClosing(System.ComponentModel.CancelEventArgs e)

@@ -144,6 +144,7 @@ namespace MyLeap.Dispatcher
 
                         if (IsCursorOnGraphicElement(entry.Key, Canvas.GetLeft(_leapCursor), Canvas.GetTop(_leapCursor)))
                         {
+                            e.SetSource(entry.Key);
                             entry.Value.OnClapDetected(e);
                             System.Diagnostics.Debug.WriteLine("Clap on entry !");
                         }
