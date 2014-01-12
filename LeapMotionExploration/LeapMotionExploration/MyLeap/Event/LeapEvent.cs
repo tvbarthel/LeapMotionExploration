@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace MyLeap.Event
 {
@@ -27,6 +28,7 @@ namespace MyLeap.Event
 
         public Leap.Vector Position;
         public int Type;
+        public FrameworkElement Source;
 
         public LeapEvent(Leap.Vector occuredPosition)
         {
@@ -38,6 +40,11 @@ namespace MyLeap.Event
         {
             Position = position;
             Type = type;
+        }
+
+        public void SetSource(FrameworkElement src)
+        {
+            Source = src;
         }
     }
 }
