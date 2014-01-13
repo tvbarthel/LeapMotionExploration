@@ -166,7 +166,7 @@ namespace MyLeap.Processor
                 System.Diagnostics.Debug.WriteLine("Fingers went up! Go to step 2 !");
                 Task.Factory.StartNew(() => OnStateChange(STEP_2_HALF_OPENED));
             }
-            else if (hand.Fingers.Count == 0)
+            else if (hand.Fingers.Count <= 1)
             {
                 //No fingers are detecteds
                 //go to the next step
