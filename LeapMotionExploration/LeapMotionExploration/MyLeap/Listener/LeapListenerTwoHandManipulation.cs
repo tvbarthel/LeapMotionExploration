@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Leap;
 using MyLeap.Processor;
 using MyLeap.Event;
+using MyLeap.Utils;
 
 namespace MyLeap.Listener
 {
@@ -13,28 +14,31 @@ namespace MyLeap.Listener
     {
         public event Action<LeapEvent> OnStateChange;
         
-        private LeapProcessorHandClosed _processorLeftHandClosed;
-        private LeapProcessorHandClosed _processorRightHandClosed;
+        private LeapProcessorHandClosed _processorPrimaryHandClosed;
+        private LeapProcessorHandClosed _processorSecondaryHandClosed;
         private LeapProcessorTwoHandRoll _processorHandRoll;
         private LeapProcessorTwoHandDistance _processorHandDistance;
         private Vector _closePosition;
-        private Boolean _isLeftHandClosed;
-        private Boolean _isRightHandClosed;
+        private Boolean _isPrimaryHandClosed;
+        private Boolean _isSecondaryHandClosed;
         private float _lastRoll;
         private double _lastDistance;
+        private int _primaryHand;
 
-        public LeapListenerTwoHandManipulation()
+        public LeapListenerTwoHandManipulation(int primaryHand)
         {
-            _isLeftHandClosed = false;
-            _isRightHandClosed = false;
+            _primaryHand = primaryHand;
 
-            _processorLeftHandClosed = new LeapProcessorHandClosed();
-            _processorLeftHandClosed.OnHandStateChange += MostLeftHandStateChanged;
-            _processorLeftHandClosed.OnStateChange += (x) => { };
+            _isPrimaryHandClosed = false;
+            _isSecondaryHandClosed = false;
 
-            _processorRightHandClosed = new LeapProcessorHandClosed();
-            _processorRightHandClosed.OnHandStateChange += MostRightHandStateChanged;
-            _processorRightHandClosed.OnStateChange += (x) => { };
+            _processorPrimaryHandClosed = new LeapProcessorHandClosed();
+            _processorPrimaryHandClosed.OnHandStateChange += PrimaryHandStateChanged;
+            _processorPrimaryHandClosed.OnStateChange += (x) => { };
+
+            _processorSecondaryHandClosed = new LeapProcessorHandClosed();
+            _processorSecondaryHandClosed.OnHandStateChange += SecondaryHandStateChanged;
+            _processorSecondaryHandClosed.OnStateChange += (x) => { };
 
             _processorHandRoll = new LeapProcessorTwoHandRoll(0.01f);
             _processorHandRoll.OnAngleChanged += RollAngleChanged;
@@ -46,34 +50,63 @@ namespace MyLeap.Listener
             _lastDistance = 0;
         }
 
+        public LeapListenerTwoHandManipulation() : this(LeapUtils.RIGHT_MOST_HAND) { }
+
         public override void OnFrame(Controller controller)
         {
             var frame = controller.Frame();
             if (frame.IsValid)
             {
-                _processorLeftHandClosed.Process(frame.Hands.Leftmost);
+                Hand primaryHand = GetPrimaryHand(frame);
+                Hand secondaryHand = GetSecondaryHand(frame);
+                
+                _processorPrimaryHandClosed.Process(primaryHand);
 
                 if (frame.Hands.Count == 2)
                 {
-                    _processorRightHandClosed.Process(frame.Hands.Rightmost);
+                    _processorSecondaryHandClosed.Process(secondaryHand);
                 }
                 else
                 {
-                    _isRightHandClosed = false;
+                    _isSecondaryHandClosed = false;
                 }
 
-                if (_isLeftHandClosed)
+                if (_isPrimaryHandClosed)
                 {
-                    if (_isRightHandClosed)
+                    if (_isSecondaryHandClosed)
                     {
-                        _processorHandDistance.Process(frame.Hands.Leftmost, frame.Hands.Rightmost);
+                        _processorHandDistance.Process(primaryHand, secondaryHand);
                     }
                     else
                     {
-                        _processorHandRoll.Process(frame.Hands.Leftmost, frame.Hands.Rightmost);   
+                        _processorHandRoll.Process(primaryHand, secondaryHand);   
                     }                    
                 }
             }
+        }
+
+        private Hand GetPrimaryHand(Frame frame)
+        {
+            Hand primaryHand = frame.Hands.Rightmost;
+
+            if (_primaryHand.Equals(LeapUtils.LEFT_MOST_HAND))
+            {
+                primaryHand = frame.Hands.Leftmost;
+            }
+
+            return primaryHand;
+        }
+
+        private Hand GetSecondaryHand(Frame frame)
+        {
+            Hand secondaryHand = frame.Hands.Leftmost;
+
+            if (_primaryHand.Equals(LeapUtils.LEFT_MOST_HAND))
+            {
+                secondaryHand = frame.Hands.Rightmost;
+            }
+
+            return secondaryHand;
         }
 
         public void HandDistanceChanged(double newDistance)
@@ -112,10 +145,10 @@ namespace MyLeap.Listener
             _lastRoll = newRoll;
         }
 
-        public void MostLeftHandStateChanged(HandCloseEvent e)
+        public void PrimaryHandStateChanged(HandCloseEvent e)
         {
-            _isLeftHandClosed = e.Type.Equals(HandCloseEvent.OPEN) ? false : true;
-            if (_isLeftHandClosed)
+            _isPrimaryHandClosed = e.Type.Equals(HandCloseEvent.OPEN) ? false : true;
+            if (_isPrimaryHandClosed)
             {
                 _closePosition = e.Position;
             }
@@ -125,9 +158,9 @@ namespace MyLeap.Listener
             }
         }
 
-        public void MostRightHandStateChanged(HandCloseEvent e)
+        public void SecondaryHandStateChanged(HandCloseEvent e)
         {
-            _isRightHandClosed = e.Type.Equals(HandCloseEvent.OPEN) ? false : true;
+            _isSecondaryHandClosed = e.Type.Equals(HandCloseEvent.OPEN) ? false : true;
         }
     }
 }
