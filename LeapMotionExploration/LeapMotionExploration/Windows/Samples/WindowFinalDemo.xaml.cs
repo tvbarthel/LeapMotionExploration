@@ -121,7 +121,7 @@ namespace LeapMotionExploration.Windows.Samples
             _controller.AddListener(_rotatingSelectionListener);
             _rotatingSelectionListener.OnStateChange += rotationSelectionEvent;
 
-            _shapeManipulationListener = new LeapListenerTwoHandManipulation();
+            _shapeManipulationListener = new LeapListenerTwoHandManipulation(_mainHand);
             _controller.AddListener(_shapeManipulationListener);
             _shapeManipulationListener.OnStateChange += this.OnShapeManipulationEvent;
 
