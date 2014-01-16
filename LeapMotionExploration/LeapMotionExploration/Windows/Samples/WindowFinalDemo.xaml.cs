@@ -811,6 +811,8 @@ namespace LeapMotionExploration.Windows.Samples
 
         private void DragStarted()
         {
+            //HotFix null exception
+            if (_hoveredGraphicElement == null) return;
 
             Application.Current.Dispatcher.Invoke(new Action(() =>
             {
